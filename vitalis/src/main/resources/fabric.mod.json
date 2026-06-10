@@ -12,9 +12,6 @@
   "icon": "assets/vitalis/icon.png",
   "environment": "*",
   "entrypoints": {
-    "cardinal-components": [
-      "me.xavi.vitalis.registry.ModComponents"
-    ],
     "fabric-datagen": [
       "me.xavi.vitalis.client.VitalisDataGenerator"
     ],
@@ -32,7 +29,6 @@
       "environment": "client"
     }
   ],
-  "accessWidener": "vitalis.accesswidener",
   "depends": {
     "fabricloader": ">=${loader_version}",
     "minecraft": "${minecraft_version}",

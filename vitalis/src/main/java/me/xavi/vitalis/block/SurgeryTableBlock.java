@@ -1,17 +1,28 @@
 package me.xavi.vitalis.block;
 
+import me.xavi.vitalis.network.SurgeryStatePayload;
+import me.xavi.vitalis.util.SurgeryData;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.block.*;
+        import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.EnumProperty;
+import net.minecraft.state.property.Properties;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Properties;
-
 public class SurgeryTableBlock extends Block implements BlockEntityProvider {
-    public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     private static final VoxelShape BASE_SHAPE = VoxelShapes.union(
             Block.createCuboidShape(0, 0, 0, 16, 8, 16),
             Block.createCuboidShape(0, 8, 4, 16, 16, 12)
@@ -46,30 +57,36 @@ public class SurgeryTableBlock extends Block implements BlockEntityProvider {
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!world.isClient) {
-            var component = player.getComponent(ModComponents.SURGERY_PLAYER);
-            if (!component.isOnTable()) {
+        if (!world.isClient()) {
+            if (!SurgeryData.isOnTable(player)) {
                 BlockPos headPos = getHeadPos(pos, state.get(FACING));
+                float yaw = switch (state.get(FACING)) {
+                    case NORTH -> 180.0F;
+                    case SOUTH -> 0.0F;
+                    case WEST -> 90.0F;
+                    case EAST -> -90.0F;
+                    default -> 0.0F;
+                };
                 player.setPosition(headPos.getX() + 0.5, headPos.getY() + 0.2, headPos.getZ() + 0.5);
-                player.setYaw(state.get(FACING).asRotation());
+                player.setYaw(yaw);
                 player.setPitch(0);
                 player.setSneaking(false);
 
-                component.setOnTable(true);
-                component.setTablePos(pos);
+                SurgeryData.setOnTable(player, true);
+                SurgeryData.setTablePos(player, pos);
 
                 // Példa sérülések
-                component.setInjury("head", 0.75f);
-                component.setInjury("left_arm", 0.30f);
-                component.setInjury("right_arm", 0.0f);
-                component.setInjury("chest", 0.15f);
-                component.setInjury("legs", 0.50f);
+                SurgeryData.setInjury(player, "head", 0.75f);
+                SurgeryData.setInjury(player, "left_arm", 0.30f);
+                SurgeryData.setInjury(player, "right_arm", 0.0f);
+                SurgeryData.setInjury(player, "chest", 0.15f);
+                SurgeryData.setInjury(player, "legs", 0.50f);
 
-                ServerPlayNetworking.send(player, new SurgeryStatePayload(pos, true));
+                ServerPlayNetworking.send((ServerPlayerEntity) player, new SurgeryStatePayload(pos, true));
             } else {
-                component.clearAllInjuries();
+                SurgeryData.clearAllInjuries(player);
                 player.sendMessage(net.minecraft.text.Text.literal("§aAll injuries healed!"), true);
-                ServerPlayNetworking.send(player, new SurgeryStatePayload(pos, false));
+                ServerPlayNetworking.send((ServerPlayerEntity) player, new SurgeryStatePayload(pos, false));
             }
         }
         return ActionResult.SUCCESS;

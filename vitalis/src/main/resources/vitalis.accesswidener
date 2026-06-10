@@ -1,4 +1,0 @@
-accessWidener v2 named
-accessible class net/minecraft/client/render/Camera
-accessible method net/minecraft/client/render/Camera setPosition(DDD)V
-accessible method net/minecraft/client/render/Camera setRotation(FF)V

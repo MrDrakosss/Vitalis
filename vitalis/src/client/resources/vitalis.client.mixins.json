@@ -1,9 +1,11 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "me.xavi.vitalis.mixin.client",
-  "compatibilityLevel": "JAVA_25",
+  "package": "me.xavi.vitalis.mixin",
+  "compatibilityLevel": "JAVA_21",
   "client": [
+    "CameraAccessor",
+    "CameraMixin"
   ],
   "injectors": {
     "defaultRequire": 1

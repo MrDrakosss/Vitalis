@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "vitalis:block/surgery_table_head", "y": 180 },
+    "facing=south": { "model": "vitalis:block/surgery_table_head" },
+    "facing=east": { "model": "vitalis:block/surgery_table_head", "y": 90 },
+    "facing=west": { "model": "vitalis:block/surgery_table_head", "y": 270 }
+  }
+}

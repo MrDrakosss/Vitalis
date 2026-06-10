@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "vitalis",
+  "version": "${version}",
+  "name": "Vitalis",
+  "description": "Surgery table mod with injury holograms and orbit camera",
+  "authors": [
+    "Xavi"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/vitalis/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "cardinal-components": [
+      "me.xavi.vitalis.registry.ModComponents"
+    ],
+    "fabric-datagen": [
+      "me.xavi.vitalis.client.VitalisDataGenerator"
+    ],
+    "client": [
+      "me.xavi.vitalis.client.VitalisClient"
+    ],
+    "main": [
+      "me.xavi.vitalis.Vitalis"
+    ]
+  },
+  "mixins": [
+    "vitalis.mixins.json",
+    {
+      "config": "vitalis.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "accessWidener": "vitalis.accesswidener",
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "${minecraft_version}",
+    "java": ">=21",
+    "fabric-api": "*",
+    "cardinal-components": ">=6.1.0"
+  },
+  "custom": {
+    "cardinal-components": [
+      "vitalis:surgery_player"
+    ]
+  }
+}

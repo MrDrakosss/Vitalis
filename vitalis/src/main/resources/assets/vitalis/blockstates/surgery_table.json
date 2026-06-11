@@ -1,8 +1,13 @@
 {
   "variants": {
-    "facing=north": { "model": "vitalis:block/surgery_table_head", "y": 180 },
-    "facing=south": { "model": "vitalis:block/surgery_table_head" },
-    "facing=east": { "model": "vitalis:block/surgery_table_head", "y": 90 },
-    "facing=west": { "model": "vitalis:block/surgery_table_head", "y": 270 }
+    "part=head,facing=south": { "model": "vitalis:block/surgery_table_head" },
+    "part=head,facing=west":  { "model": "vitalis:block/surgery_table_head", "y": 90 },
+    "part=head,facing=north": { "model": "vitalis:block/surgery_table_head", "y": 180 },
+    "part=head,facing=east":  { "model": "vitalis:block/surgery_table_head", "y": 270 },
+
+    "part=foot,facing=south": { "model": "vitalis:block/surgery_table_foot" },
+    "part=foot,facing=west":  { "model": "vitalis:block/surgery_table_foot" },
+    "part=foot,facing=north": { "model": "vitalis:block/surgery_table_foot" },
+    "part=foot,facing=east":  { "model": "vitalis:block/surgery_table_foot" }
   }
 }

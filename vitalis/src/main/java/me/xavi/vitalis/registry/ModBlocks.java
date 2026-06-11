@@ -26,13 +26,10 @@ public class ModBlocks {
             ));
 
     private static Block registerBlock(String name, Block block) {
-        // Blokk regisztrálása a saját kulcsával (a blokk Settings-ében már szerepel)
         RegistryKey<Block> blockKey = RegistryKey.of(RegistryKeys.BLOCK, Vitalis.id(name));
         Registry.register(Registries.BLOCK, blockKey, block);
 
-        // Item kulcs létrehozása
         RegistryKey<Item> itemKey = RegistryKey.of(RegistryKeys.ITEM, Vitalis.id(name));
-        // BlockItem létrehozása a megfelelő Settings-sel
         BlockItem blockItem = new BlockItem(block, new Item.Settings().registryKey(itemKey));
         Registry.register(Registries.ITEM, itemKey, blockItem);
 

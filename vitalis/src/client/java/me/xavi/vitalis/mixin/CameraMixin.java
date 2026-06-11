@@ -9,7 +9,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Camera.class)
 public class CameraMixin {
-    @Inject(method = "update", at = @At("HEAD"))
+    /**
+     * Runs after vanilla camera update logic so the orbit camera's position
+     * and rotation are not immediately overwritten.
+     */
+    @Inject(method = "update", at = @At("TAIL"))
     private void onUpdate(CallbackInfo ci) {
         OrbitCameraHandler.tick();
     }

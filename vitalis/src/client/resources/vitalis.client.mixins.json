@@ -5,7 +5,10 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "CameraAccessor",
-    "CameraMixin"
+    "CameraMixin",
+    "LivingEntityRendererMixin",
+    "ClientPlayerMovementMixin",
+    "ClientInteractionMixin"
   ],
   "injectors": {
     "defaultRequire": 1

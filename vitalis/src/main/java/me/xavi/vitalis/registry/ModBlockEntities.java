@@ -14,5 +14,6 @@ public class ModBlockEntities {
                     FabricBlockEntityTypeBuilder.create(SurgeryTableBlockEntity::new,
                             ModBlocks.SURGERY_TABLE).build());
 
-    public static void initialize() {}
+    public static void initialize() {
+    }
 }

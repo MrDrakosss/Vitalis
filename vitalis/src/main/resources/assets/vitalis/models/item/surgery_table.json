@@ -1,3 +1,6 @@
 {
-  "parent": "vitalis:block/surgery_table_head"
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "vitalis:block/surgery_table_head"
+  }
 }

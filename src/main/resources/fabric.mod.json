@@ -12,7 +12,8 @@
     "Special thanks for the Semmelweis University"
   ],
   "contact": {
-    "sources": "www.xavi.hu"
+    "homepage": "https://www.xavi.hu/",
+    "sources": "https://github.com/MrDrakosss/Vitalis"
   },
   "license": "MIT",
   "icon": "assets/vitalis/icon.png",

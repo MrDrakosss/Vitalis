@@ -2,48 +2,65 @@ package me.xavi.vitalis.network;
 
 import me.xavi.vitalis.registry.ModNetwork;
 import me.xavi.vitalis.util.SurgeryData;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
-/**
- * Sent from the server to the client whenever the player's surgery state
- * changes (lying down, getting healed). {@code injuries} always has
- * {@link SurgeryData#BODY_PARTS}.length entries, in that same order.
- * <p>
- * Internally the float array is encoded as a {@code List<Float>} via
- * {@link PacketCodecs#toList(int)}, since that is the well-documented,
- * stable way to encode a fixed-size collection of primitives.
- */
-public record SurgeryStatePayload(BlockPos tablePos, boolean active, float[] injuries) implements CustomPayload {
-    public static final CustomPayload.Id<SurgeryStatePayload> ID = ModNetwork.SURGERY_STATE;
+public record SurgeryStatePayload(
+        UUID playerUuid,
+        BlockPos tablePos,
+        boolean active,
+        float[] injuries
+) implements CustomPacketPayload {
 
-    private static final PacketCodec<RegistryByteBuf, List<Float>> INJURY_LIST_CODEC =
-            PacketCodecs.FLOAT.<RegistryByteBuf>cast().collect(PacketCodecs.toList(SurgeryData.BODY_PARTS.length));
+    public static final Type<SurgeryStatePayload> ID =
+            ModNetwork.SURGERY_STATE;
 
-    public static final PacketCodec<RegistryByteBuf, SurgeryStatePayload> CODEC =
-            PacketCodec.tuple(
-                    BlockPos.PACKET_CODEC.<RegistryByteBuf>cast(), SurgeryStatePayload::tablePos,
-                    PacketCodecs.BOOLEAN.<RegistryByteBuf>cast(), SurgeryStatePayload::active,
-                    INJURY_LIST_CODEC, payload -> {
-                        List<Float> list = new ArrayList<>(payload.injuries.length);
-                        for (float f : payload.injuries) list.add(f);
-                        return list;
-                    },
-                    (pos, active, list) -> {
-                        float[] arr = new float[list.size()];
-                        for (int i = 0; i < arr.length; i++) arr[i] = list.get(i);
-                        return new SurgeryStatePayload(pos, active, arr);
-                    }
+    public static final StreamCodec<FriendlyByteBuf, SurgeryStatePayload> CODEC =
+            StreamCodec.of(
+                    SurgeryStatePayload::write,
+                    SurgeryStatePayload::read
             );
 
+    private static void write(FriendlyByteBuf buffer, SurgeryStatePayload payload) {
+        buffer.writeUUID(payload.playerUuid);
+        buffer.writeBlockPos(payload.tablePos);
+        buffer.writeBoolean(payload.active);
+
+        int expectedLength = SurgeryData.BODY_PARTS.length;
+        buffer.writeVarInt(expectedLength);
+
+        for (int i = 0; i < expectedLength; i++) {
+            float value = i < payload.injuries.length ? payload.injuries[i] : 0.0F;
+            buffer.writeFloat(value);
+        }
+    }
+
+    private static SurgeryStatePayload read(FriendlyByteBuf buffer) {
+        UUID uuid = buffer.readUUID();
+        BlockPos tablePos = buffer.readBlockPos();
+        boolean active = buffer.readBoolean();
+
+        int length = buffer.readVarInt();
+        int safeLength = Math.max(0, Math.min(length, SurgeryData.BODY_PARTS.length));
+        float[] injuries = new float[safeLength];
+
+        for (int i = 0; i < length; i++) {
+            float value = buffer.readFloat();
+
+            if (i < safeLength) {
+                injuries[i] = value;
+            }
+        }
+
+        return new SurgeryStatePayload(uuid, tablePos, active, injuries);
+    }
+
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

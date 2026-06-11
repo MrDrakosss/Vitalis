@@ -1,44 +1,47 @@
 package me.xavi.vitalis.mixin;
 
 import me.xavi.vitalis.client.ClientSurgeryState;
-import net.minecraft.client.input.Input;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.PlayerInput;
+import net.minecraft.client.player.Input;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Neutralizes the local player's movement input while they're lying on a
- * surgery table. Zeroing only the derived sidewaysSpeed/forwardSpeed fields
- * isn't enough, since tickMovement() recomputes those from the raw Input
- * (WASD) every tick - so the raw Input itself is zeroed here, at the HEAD
- * of tickMovement, before anything reads it. The "sneak" flag is preserved
- * so shift-to-get-up keeps working.
- */
-@Mixin(ClientPlayerEntity.class)
+@Mixin(LocalPlayer.class)
 public abstract class ClientPlayerMovementMixin {
 
-    @Inject(method = "tickMovement", at = @At("HEAD"))
+    @Inject(method = "aiStep", at = @At("HEAD"))
     private void vitalis$cancelMovementWhileLying(CallbackInfo ci) {
-        if (!ClientSurgeryState.isActive()) return;
-
-        ClientPlayerEntity self = (ClientPlayerEntity) (Object) this;
-
-        Input input = self.input;
-        if (input != null) {
-
-            PlayerInput pi = input.playerInput;
-            if (pi != null) {
-                input.playerInput = new PlayerInput(false, false, false, false, false, pi.sneak(), false);
-            }
+        if (!ClientSurgeryState.isActive()) {
+            return;
         }
 
-        self.sidewaysSpeed = 0.0F;
-        self.forwardSpeed = 0.0F;
-        self.upwardSpeed = 0.0F;
-        self.setJumping(false);
+        LocalPlayer self = (LocalPlayer) (Object) this;
+
+        Input input = self.input;
+
+        if (input != null) {
+            input.leftImpulse = 0.0F;
+            input.forwardImpulse = 0.0F;
+
+            input.up = false;
+            input.down = false;
+            input.left = false;
+            input.right = false;
+
+            input.jumping = false;
+            input.shiftKeyDown = false;
+        }
+
         self.setSprinting(false);
+        self.setJumping(false);
+
+        self.xxa = 0.0F;
+        self.yya = 0.0F;
+        self.zza = 0.0F;
+
+        self.setDeltaMovement(Vec3.ZERO);
     }
 }

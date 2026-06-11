@@ -1,4 +1,111 @@
 {
   "block.vitalis.surgery_table": "Surgery Table",
-  "item.vitalis.surgery_table": "Surgery Table"
+  "item.vitalis.surgery_table": "Surgery Table",
+
+  "screen.vitalis.surgery": "Vitalis Surgery",
+  "screen.vitalis.close": "Close",
+  "screen.vitalis.surgery.start": "Start Surgery",
+
+  "screen.vitalis.selected": "Selected:",
+  "screen.vitalis.injury": "Injury:",
+  "screen.vitalis.status": "Status:",
+
+  "screen.vitalis.status.stable": "Stable",
+  "screen.vitalis.status.injured": "Injured",
+  "screen.vitalis.status.critical": "Critical",
+
+  "screen.vitalis.first_aid_stock": "First Aid Storage",
+
+  "body_part.vitalis.head": "Head",
+  "body_part.vitalis.chest": "Chest",
+  "body_part.vitalis.left_arm": "Left Arm",
+  "body_part.vitalis.right_arm": "Right Arm",
+  "body_part.vitalis.legs": "Legs",
+
+  "medical.vitalis.bandage": "Bandage",
+  "medical.vitalis.splint": "Splint",
+  "medical.vitalis.surgical_kit": "Surgical Kit",
+  "medical.vitalis.painkiller": "Painkiller",
+  "medical.vitalis.blood_bag": "Blood Bag",
+
+  "message.vitalis.table_occupied": "This surgery table is already occupied.",
+  "message.vitalis.surgery_started": "Surgery started.",
+  "message.vitalis.patient_stabilized": "Patient stabilized.",
+  "message.vitalis.not_enough_supplies": "Not enough medical supplies.",
+
+  "status.vitalis.healthy": "Healthy",
+  "status.vitalis.fracture": "Fracture",
+  "status.vitalis.open_fracture": "Open Fracture",
+  "status.vitalis.bleeding": "Bleeding",
+  "status.vitalis.critical_bleeding": "Critical Bleeding",
+  "status.vitalis.unconscious": "Unconscious",
+
+  "hud.vitalis.blood": "Blood",
+  "hud.vitalis.heart_rate": "Heart Rate",
+  "hud.vitalis.condition": "Condition",
+
+  "screen.vitalis.inventory": "Medical Inventory",
+  "screen.vitalis.patient": "Patient",
+  "screen.vitalis.treatment": "Treatment",
+  "screen.vitalis.supplies": "Supplies",
+
+  "body_part.vitalis.abdomen": "Abdomen",
+  "body_part.vitalis.left_leg": "Left Leg",
+  "body_part.vitalis.right_leg": "Right Leg",
+
+  "status.vitalis.bullet_wound": "Bullet Wound",
+  "status.vitalis.cut": "Cut",
+  "status.vitalis.burn": "Burn",
+
+  "item.vitalis.bandage": "Bandage",
+  "item.vitalis.bandage.tooltip": "Used to treat minor bleeding and wounds.",
+
+  "item.vitalis.sterile_bandage": "Sterile Bandage",
+  "item.vitalis.sterile_bandage.tooltip": "Used to cleanly cover wounds and reduce infection risk.",
+
+  "item.vitalis.pressure_bandage": "Pressure Bandage",
+  "item.vitalis.pressure_bandage.tooltip": "Temporarily controls heavier bleeding.",
+
+  "item.vitalis.tourniquet": "Tourniquet",
+  "item.vitalis.tourniquet.tooltip": "Stops critical limb bleeding.",
+
+  "item.vitalis.splint": "Splint",
+  "item.vitalis.splint.tooltip": "Stabilizes a broken arm or leg.",
+
+  "item.vitalis.cast": "Cast",
+  "item.vitalis.cast.tooltip": "Provides long-term support for fractures.",
+
+  "item.vitalis.surgical_kit": "Surgical Kit",
+  "item.vitalis.surgical_kit.tooltip": "Required for treating severe injuries surgically.",
+
+  "item.vitalis.scalpel": "Scalpel",
+  "item.vitalis.scalpel.tooltip": "A basic tool for surgical procedures.",
+
+  "item.vitalis.forceps": "Forceps",
+  "item.vitalis.forceps.tooltip": "Used to remove foreign objects or bullets.",
+
+  "item.vitalis.suture_kit": "Suture Kit",
+  "item.vitalis.suture_kit.tooltip": "Used to close wounds after surgery.",
+
+  "item.vitalis.painkiller": "Painkiller",
+  "item.vitalis.painkiller.tooltip": "Temporarily reduces the effects of injuries.",
+
+  "item.vitalis.morphine": "Morphine",
+  "item.vitalis.morphine.tooltip": "A strong painkiller for severe trauma.",
+
+  "item.vitalis.antibiotic": "Antibiotic",
+  "item.vitalis.antibiotic.tooltip": "Used to treat and prevent infection.",
+
+  "item.vitalis.blood_bag": "Blood Bag",
+  "item.vitalis.blood_bag.tooltip": "Restores lost blood volume.",
+
+  "item.vitalis.iv_set": "IV Set",
+  "item.vitalis.iv_set.tooltip": "Required to administer fluids or blood bags.",
+
+  "item.vitalis.vital_scanner": "Vital Scanner",
+  "item.vitalis.vital_scanner.tooltip": "A diagnostic tool for quickly checking injuries.",
+
+  "screen.vitalis.required_supplies": "Required Supplies",
+
+  "message.vitalis.surgery_finished": "Surgery completed successfully."
 }

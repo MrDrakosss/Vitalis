@@ -1,126 +1,206 @@
 package me.xavi.vitalis.block;
 
-import me.xavi.vitalis.Vitalis;
+import me.xavi.vitalis.medical.BodyPart;
+import me.xavi.vitalis.medical.InjuryStatus;
 import me.xavi.vitalis.network.SurgeryStatePayload;
 import me.xavi.vitalis.util.SurgeryData;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.BedPart;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BedPart;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * The surgery table. Like a vanilla bed, this is a true 1x2x1 structure made
- * of two block positions: a {@link BedPart#HEAD} and a {@link BedPart#FOOT},
- * each with its own (single-block) outline/collision shape. This avoids the
- * "phantom hitbox" issues that come from a single block claiming a shape
- * that extends into a neighboring (air) block position.
- */
-public class SurgeryTableBlock extends Block implements BlockEntityProvider {
-    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
-    public static final EnumProperty<BedPart> PART = EnumProperty.of("part", BedPart.class);
+public class SurgeryTableBlock extends Block implements EntityBlock {
 
-    public SurgeryTableBlock(AbstractBlock.Settings settings) {
-        super(settings);
-        setDefaultState(getStateManager().getDefaultState()
-                .with(FACING, Direction.NORTH)
-                .with(PART, BedPart.FOOT));
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<BedPart> PART = EnumProperty.create("part", BedPart.class);
+
+    public static final double TABLE_SURFACE_HEIGHT = 1.08D;
+
+    private static final VoxelShape SHAPE =
+            Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+
+    public SurgeryTableBlock(BlockBehaviour.Properties properties) {
+        super(properties);
+
+        this.registerDefaultState(
+                this.stateDefinition.any()
+                        .setValue(FACING, Direction.NORTH)
+                        .setValue(PART, BedPart.FOOT)
+        );
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, PART);
     }
 
     @Nullable
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        BlockPos pos = ctx.getBlockPos();
-        Direction facing = ctx.getHorizontalPlayerFacing().getOpposite();
-        BlockPos headPos = pos.offset(facing.getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        BlockPos pos = context.getClickedPos();
+        Level level = context.getLevel();
 
-        if (!ctx.getWorld().getBlockState(headPos).canReplace(ctx)) {
+        Direction facing = context.getHorizontalDirection().getOpposite();
+        BlockPos headPos = pos.relative(facing.getOpposite());
+
+        if (!level.getBlockState(headPos).canBeReplaced(context)) {
             return null;
         }
 
-        return getDefaultState().with(FACING, facing).with(PART, BedPart.FOOT);
+        return this.defaultBlockState()
+                .setValue(FACING, facing)
+                .setValue(PART, BedPart.FOOT);
     }
 
     @Override
-    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable net.minecraft.entity.LivingEntity placer, ItemStack itemStack) {
-        super.onPlaced(world, pos, state, placer, itemStack);
-        if (world.isClient()) return;
+    public void setPlacedBy(
+            Level level,
+            BlockPos pos,
+            BlockState state,
+            @Nullable LivingEntity placer,
+            ItemStack stack
+    ) {
+        super.setPlacedBy(level, pos, state, placer, stack);
 
-        Direction facing = state.get(FACING);
-        BlockPos headPos = pos.offset(facing.getOpposite());
-        world.setBlockState(headPos, state.with(PART, BedPart.HEAD), Block.NOTIFY_ALL);
-    }
-
-    @Override
-    public void onBroken(net.minecraft.world.WorldAccess world, BlockPos pos, BlockState state) {
-        super.onBroken(world, pos, state);
-        if (world.isClient()) return;
-
-        BedPart part = state.get(PART);
-        Direction facing = state.get(FACING);
-        BlockPos otherPos = (part == BedPart.HEAD)
-                ? pos.offset(facing)
-                : pos.offset(facing.getOpposite());
-
-        BlockState otherState = world.getBlockState(otherPos);
-        if (otherState.isOf(this) && otherState.get(PART) != part) {
-            world.removeBlock(otherPos, false);
+        if (level.isClientSide) {
+            return;
         }
+
+        Direction facing = state.getValue(FACING);
+        BlockPos headPos = pos.relative(facing.getOpposite());
+
+        level.setBlock(
+                headPos,
+                state.setValue(PART, BedPart.HEAD),
+                Block.UPDATE_ALL
+        );
     }
 
     @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return Block.createCuboidShape(0, 0, 0, 16, 16, 16);
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (!level.isClientSide) {
+            BedPart part = state.getValue(PART);
+            Direction facing = state.getValue(FACING);
+
+            BlockPos otherPos = part == BedPart.HEAD
+                    ? pos.relative(facing)
+                    : pos.relative(facing.getOpposite());
+
+            BlockState otherState = level.getBlockState(otherPos);
+
+            if (otherState.getBlock() == this && otherState.getValue(PART) != part) {
+                level.destroyBlock(otherPos, false, player);
+            }
+        }
+
+        return super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return Block.createCuboidShape(0, 0, 0, 16, 16, 16);
+    protected VoxelShape getShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos pos,
+            CollisionContext context
+    ) {
+        return SHAPE;
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos pos,
+            CollisionContext context
+    ) {
+        return SHAPE;
+    }
+
+    @Override
+    protected VoxelShape getOcclusionShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos pos
+    ) {
+        return Shapes.empty();
+    }
+
+    @Override
+    protected VoxelShape getVisualShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos pos,
+            CollisionContext context
+    ) {
+        return Shapes.empty();
+    }
+
+    @Override
+    protected boolean propagatesSkylightDown(
+            BlockState state,
+            BlockGetter level,
+            BlockPos pos
+    ) {
+        return true;
+    }
+
+    @Override
+    protected float getShadeBrightness(
+            BlockState state,
+            BlockGetter level,
+            BlockPos pos
+    ) {
+        return 1.0F;
     }
 
     @Nullable
     @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new SurgeryTableBlockEntity(pos, state);
     }
 
     @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (world.isClient()) {
-            return ActionResult.SUCCESS;
+    protected InteractionResult useWithoutItem(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            BlockHitResult hitResult
+    ) {
+        if (level.isClientSide) {
+            return InteractionResult.SUCCESS;
         }
 
-        // Always use the HEAD position as the canonical "table position",
-        // regardless of which half the player clicked.
-        BlockPos headPos = (state.get(PART) == BedPart.HEAD) ? pos : pos.offset(state.get(FACING).getOpposite());
-        BlockState headState = world.getBlockState(headPos);
-        if (!headState.isOf(this)) {
-            // Structure is broken/incomplete; fall back to the clicked state.
+        BlockPos headPos = state.getValue(PART) == BedPart.HEAD
+                ? pos
+                : pos.relative(state.getValue(FACING).getOpposite());
+
+        BlockState headState = level.getBlockState(headPos);
+
+        if (headState.getBlock() != this) {
             headState = state;
             headPos = pos;
         }
@@ -130,22 +210,30 @@ public class SurgeryTableBlock extends Block implements BlockEntityProvider {
         } else {
             heal(player);
         }
-        return ActionResult.SUCCESS;
+
+        return InteractionResult.SUCCESS;
     }
 
-    private void lieDown(BlockState headState, BlockPos headPos, PlayerEntity player) {
-        Direction facing = headState.get(FACING);
+    private void lieDown(BlockState headState, BlockPos headPos, Player player) {
+        BlockEntity be = player.level().getBlockEntity(headPos);
 
-        // The HEAD block is where the player's head goes; the body extends
-        // towards the FOOT block (i.e. opposite of `facing`, matching the
-        // offset used in onPlaced/onBroken).
-        double x = headPos.getX() + 0.5;
-        double y = headPos.getY() + Vitalis.TABLE_TOP_HEIGHT;
-        double z = headPos.getZ() + 0.5;
+        if (!(be instanceof SurgeryTableBlockEntity tableEntity)) {
+            return;
+        }
 
-        // Yaw so the player's feet point towards the FOOT block (i.e.
-        // towards `facing`, since FOOT = headPos + facing). Minecraft yaw:
-        // 0=south(+Z), 90=west(-X), 180=north(-Z), 270/-90=east(+X).
+        if (tableEntity.isOccupied() && !tableEntity.isOccupiedBy(player.getUUID())) {
+            player.displayClientMessage(Component.literal("§cEz a műtőasztal már foglalt!"), true);
+            return;
+        }
+
+        tableEntity.setOccupant(player.getUUID());
+
+        Direction facing = headState.getValue(FACING);
+
+        double x = headPos.getX() + 0.5D + facing.getStepX() * 1.0D;
+        double y = headPos.getY() + TABLE_SURFACE_HEIGHT;
+        double z = headPos.getZ() + 0.5D + facing.getStepZ() * 1.0D;
+
         float yaw = switch (facing) {
             case SOUTH -> 0.0F;
             case NORTH -> 180.0F;
@@ -154,59 +242,83 @@ public class SurgeryTableBlock extends Block implements BlockEntityProvider {
             default -> 0.0F;
         };
 
-        player.setSneaking(false);
-        player.setPose(EntityPose.SLEEPING);
+        player.setShiftKeyDown(false);
+        player.setPose(Pose.SLEEPING);
 
         SurgeryData.setOnTable(player, true);
         SurgeryData.setTablePos(player, headPos);
         SurgeryData.setLockPos(player, headPos);
         SurgeryData.setLockYaw(player, yaw);
 
-        if (player instanceof ServerPlayerEntity serverPlayer) {
-            // requestTeleport authoritatively syncs position+rotation to the
-            // client and discards stale movement packets, so the player
-            // doesn't snap back to where they were standing.
-            serverPlayer.networkHandler.requestTeleport(x, y, z, yaw, 0.0F);
+        if (player instanceof ServerPlayer serverPlayer) {
+            serverPlayer.connection.teleport(x, y, z, yaw, 0.0F);
         } else {
-            player.setPosition(x, y, z);
-            player.setYaw(yaw + 180);
-            player.setPitch(0.0F);
+            player.setPos(x, y, z);
+            player.setYRot(yaw);
+            player.setXRot(0.0F);
         }
-        player.setBodyYaw(yaw + 180);
-        player.setHeadYaw(yaw + 180);
 
-        // Example injuries so the holograms have something to display.
-        SurgeryData.setInjury(player, "head", 0.75f);
-        SurgeryData.setInjury(player, "left_arm", 0.30f);
-        SurgeryData.setInjury(player, "right_arm", 0.0f);
-        SurgeryData.setInjury(player, "chest", 0.15f);
-        SurgeryData.setInjury(player, "legs", 0.50f);
+        player.setYBodyRot(yaw);
+        player.setYHeadRot(yaw);
+
+        SurgeryData.setBodyPartHp(player, BodyPart.HEAD, 75);
+        SurgeryData.setBodyPartHp(player, BodyPart.CHEST, 85);
+        SurgeryData.setBodyPartHp(player, BodyPart.ABDOMEN, 90);
+        SurgeryData.setBodyPartHp(player, BodyPart.LEFT_ARM, 70);
+        SurgeryData.setBodyPartHp(player, BodyPart.RIGHT_ARM, 100);
+        SurgeryData.setBodyPartHp(player, BodyPart.LEFT_LEG, 35);
+        SurgeryData.setBodyPartHp(player, BodyPart.RIGHT_LEG, 60);
+
+        SurgeryData.setBodyPartStatus(player, BodyPart.HEAD, InjuryStatus.NONE);
+        SurgeryData.setBodyPartStatus(player, BodyPart.CHEST, InjuryStatus.CUT);
+        SurgeryData.setBodyPartStatus(player, BodyPart.ABDOMEN, InjuryStatus.NONE);
+        SurgeryData.setBodyPartStatus(player, BodyPart.LEFT_ARM, InjuryStatus.CUT);
+        SurgeryData.setBodyPartStatus(player, BodyPart.RIGHT_ARM, InjuryStatus.NONE);
+        SurgeryData.setBodyPartStatus(player, BodyPart.LEFT_LEG, InjuryStatus.FRACTURE);
+        SurgeryData.setBodyPartStatus(player, BodyPart.RIGHT_LEG, InjuryStatus.NONE);
+        SurgeryData.setBloodMl(player, 4300.0D);
 
         sendState(player, headPos, true);
     }
 
-    /** Called both when healing on a second use, and when the player gets up via shift. */
-    public static void getUp(PlayerEntity player) {
+    public static void getUp(Player player) {
         SurgeryData.clearAllInjuries(player);
         SurgeryData.setOnTable(player, false);
         SurgeryData.setLockPos(player, null);
-        SurgeryData.setLockYaw(player, 0.0f);
+        SurgeryData.setLockYaw(player, 0.0F);
 
-        player.setPose(EntityPose.STANDING);
+        player.setPose(Pose.STANDING);
 
         BlockPos tablePos = SurgeryData.getTablePos(player);
-        sendState(player, tablePos != null ? tablePos : player.getBlockPos(), false);
+
+        if (tablePos != null && player.level().getBlockEntity(tablePos) instanceof SurgeryTableBlockEntity tableEntity) {
+            if (tableEntity.isOccupiedBy(player.getUUID())) {
+                tableEntity.clearOccupant();
+            }
+        }
+
+        sendState(player, tablePos != null ? tablePos : player.blockPosition(), false);
     }
 
-    private void heal(PlayerEntity player) {
+    private void heal(Player player) {
         getUp(player);
-        player.sendMessage(Text.literal("§aAll injuries healed!"), true);
+        player.displayClientMessage(Component.literal("§aAll injuries healed!"), true);
     }
 
-    private static void sendState(PlayerEntity player, BlockPos tablePos, boolean active) {
-        if (player instanceof ServerPlayerEntity serverPlayer) {
-            ServerPlayNetworking.send(serverPlayer,
-                    new SurgeryStatePayload(tablePos, active, SurgeryData.getAllInjuries(player)));
+    private static void sendState(Player player, BlockPos tablePos, boolean active) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+
+        SurgeryStatePayload payload = new SurgeryStatePayload(
+                player.getUUID(),
+                tablePos,
+                active,
+                SurgeryData.getAllInjuries(player)
+        );
+
+        for (ServerPlayer target : serverPlayer.serverLevel().players()) {
+            ServerPlayNetworking.send(target, payload);
         }
     }
 }

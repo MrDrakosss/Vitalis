@@ -1,47 +1,58 @@
 package me.xavi.vitalis.client.renderer;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import me.xavi.vitalis.client.ClientSurgeryState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.feature.FeatureRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.network.chat.Component;
+import org.joml.Matrix4f;
 
-/**
- * Renders floating injury percentage holograms above the player while they
- * are lying on a surgery table. Only ever shows data for the local client
- * player, since {@link ClientSurgeryState} only tracks that player's state.
- * <p>
- * Uses the 1.21.9+ rendering pipeline: {@link FeatureRenderer} operates on a
- * {@link PlayerEntityRenderState} snapshot and submits draw commands to an
- * {@link OrderedRenderCommandQueue} instead of a {@code VertexConsumerProvider}.
- */
-public class InjuryHologramFeatureRenderer extends FeatureRenderer<PlayerEntityRenderState, PlayerEntityModel> {
+public class InjuryHologramFeatureRenderer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
-    public InjuryHologramFeatureRenderer(FeatureRendererContext<PlayerEntityRenderState, PlayerEntityModel> context) {
-        super(context);
+    public InjuryHologramFeatureRenderer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent) {
+        super(parent);
     }
 
     @Override
-    public void render(MatrixStack matrices, OrderedRenderCommandQueue queue, int light,
-                        PlayerEntityRenderState state, float limbAngle, float limbDistance) {
+    public void render(
+            PoseStack poseStack,
+            MultiBufferSource buffer,
+            int packedLight,
+            AbstractClientPlayer player,
+            float limbSwing,
+            float limbSwingAmount,
+            float partialTick,
+            float ageInTicks,
+            float netHeadYaw,
+            float headPitch
+    ) {
+        if (!ClientSurgeryState.isActive()) {
+            return;
+        }
 
-        if (!ClientSurgeryState.isActive()) return;
+        Minecraft client = Minecraft.getInstance();
 
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null || state.id != client.player.getId()) return;
+        if (client.player == null || player.getId() != client.player.getId()) {
+            return;
+        }
 
-        TextRenderer textRenderer = client.textRenderer;
-        if (textRenderer == null) return;
+        Font font = client.font;
 
-        matrices.push();
-        // Player is lying down; raise the holograms above the body.
-        matrices.translate(0, 1.6, 0);
+        poseStack.pushPose();
+
+        poseStack.translate(0.0D, 1.18D, 0.0D);
+
+        float lockYaw = ClientSurgeryState.getLockYaw();
+
+        poseStack.mulPose(Axis.YP.rotationDegrees(-(180.0F - lockYaw)));
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
 
         float headInjury = ClientSurgeryState.getInjury("head");
         float leftArmInjury = ClientSurgeryState.getInjury("left_arm");
@@ -49,53 +60,111 @@ public class InjuryHologramFeatureRenderer extends FeatureRenderer<PlayerEntityR
         float chestInjury = ClientSurgeryState.getInjury("chest");
         float legsInjury = ClientSurgeryState.getInjury("legs");
 
-        if (headInjury > 0) {
-            renderHologram(matrices, queue, light, textRenderer,
-                    Text.literal(String.format("\u26A1 HEAD: %.0f%%", headInjury * 100)).formatted(Formatting.RED),
-                    0, 0.6f, -0.7f);
+        if (headInjury > 0.0F) {
+            renderHologram(
+                    poseStack,
+                    buffer,
+                    packedLight,
+                    font,
+                    Component.literal(String.format("HEAD %.0f%%", headInjury * 100.0F)).withStyle(ChatFormatting.RED),
+                    0.0F,
+                    0.34F,
+                    -0.78F
+            );
         }
-        if (leftArmInjury > 0) {
-            renderHologram(matrices, queue, light, textRenderer,
-                    Text.literal(String.format("\uD83E\uDDBE LEFT ARM: %.0f%%", leftArmInjury * 100)).formatted(Formatting.YELLOW),
-                    -0.6f, 0.3f, 0);
+
+        if (chestInjury > 0.0F) {
+            renderHologram(
+                    poseStack,
+                    buffer,
+                    packedLight,
+                    font,
+                    Component.literal(String.format("CHEST %.0f%%", chestInjury * 100.0F)).withStyle(ChatFormatting.GOLD),
+                    0.0F,
+                    0.34F,
+                    -0.25F
+            );
         }
-        if (rightArmInjury > 0) {
-            renderHologram(matrices, queue, light, textRenderer,
-                    Text.literal(String.format("\uD83E\uDDBE RIGHT ARM: %.0f%%", rightArmInjury * 100)).formatted(Formatting.YELLOW),
-                    0.6f, 0.3f, 0);
+
+        if (leftArmInjury > 0.0F) {
+            renderHologram(
+                    poseStack,
+                    buffer,
+                    packedLight,
+                    font,
+                    Component.literal(String.format("L ARM %.0f%%", leftArmInjury * 100.0F)).withStyle(ChatFormatting.YELLOW),
+                    -0.48F,
+                    0.34F,
+                    -0.15F
+            );
         }
-        if (chestInjury > 0) {
-            renderHologram(matrices, queue, light, textRenderer,
-                    Text.literal(String.format("\u2764 CHEST: %.0f%%", chestInjury * 100)).formatted(Formatting.GOLD),
-                    0, 0.3f, -0.2f);
+
+        if (rightArmInjury > 0.0F) {
+            renderHologram(
+                    poseStack,
+                    buffer,
+                    packedLight,
+                    font,
+                    Component.literal(String.format("R ARM %.0f%%", rightArmInjury * 100.0F)).withStyle(ChatFormatting.YELLOW),
+                    0.48F,
+                    0.34F,
+                    -0.15F
+            );
         }
-        if (legsInjury > 0) {
-            renderHologram(matrices, queue, light, textRenderer,
-                    Text.literal(String.format("\uD83E\uDDB5 LEGS: %.0f%%", legsInjury * 100)).formatted(Formatting.GREEN),
-                    0, 0.3f, 0.7f);
+
+        if (legsInjury > 0.0F) {
+            renderHologram(
+                    poseStack,
+                    buffer,
+                    packedLight,
+                    font,
+                    Component.literal(String.format("LEGS %.0f%%", legsInjury * 100.0F)).withStyle(ChatFormatting.GREEN),
+                    0.0F,
+                    0.34F,
+                    0.62F
+            );
         }
-        matrices.pop();
+
+        poseStack.popPose();
     }
 
-    private void renderHologram(MatrixStack matrices, OrderedRenderCommandQueue queue, int light,
-                                  TextRenderer textRenderer, Text text, float x, float y, float z) {
-        matrices.push();
-        matrices.translate(x, y, z);
-        matrices.scale(0.025f, -0.025f, 0.025f);
+    private void renderHologram(
+            PoseStack poseStack,
+            MultiBufferSource buffer,
+            int packedLight,
+            Font font,
+            Component text,
+            float x,
+            float y,
+            float z
+    ) {
+        Minecraft client = Minecraft.getInstance();
 
-        float width = textRenderer.getWidth(text);
-        queue.submitText(
-                matrices,
-                -width / 2f, 0,
-                text.asOrderedText(),
-                true,
-                TextRenderer.TextLayerType.NORMAL,
-                light,
-                0xFFFFFF,
+        poseStack.pushPose();
+
+        poseStack.translate(x, y, z);
+
+        poseStack.mulPose(client.getEntityRenderDispatcher().cameraOrientation());
+        poseStack.scale(-0.018F, -0.018F, 0.018F);
+
+        Matrix4f matrix = poseStack.last().pose();
+
+        float width = font.width(text);
+        float drawX = -width / 2.0F;
+
+        font.drawInBatch(
+                text,
+                drawX,
+                0.0F,
+                0xFFFFFFFF,
+                false,
+                matrix,
+                buffer,
+                Font.DisplayMode.NORMAL,
                 0,
-                0
+                packedLight
         );
 
-        matrices.pop();
+        poseStack.popPose();
     }
 }

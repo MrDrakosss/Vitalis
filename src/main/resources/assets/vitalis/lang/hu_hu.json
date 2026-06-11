@@ -1,4 +1,112 @@
 {
   "block.vitalis.surgery_table": "Műtőasztal",
-  "item.vitalis.surgery_table": "Műtőasztal"
+  "item.vitalis.surgery_table": "Műtőasztal",
+
+  "screen.vitalis.surgery": "Vitalis műtő",
+  "screen.vitalis.close": "Bezárás",
+  "screen.vitalis.surgery.start": "Műtés indítása",
+
+  "screen.vitalis.selected": "Kiválasztva:",
+  "screen.vitalis.injury": "Sérülés:",
+  "screen.vitalis.status": "Állapot:",
+
+  "screen.vitalis.status.stable": "Stabil",
+  "screen.vitalis.status.injured": "Sérült",
+  "screen.vitalis.status.critical": "Kritikus",
+
+  "screen.vitalis.first_aid_stock": "Elsősegély raktár",
+
+  "body_part.vitalis.head": "Fej",
+  "body_part.vitalis.chest": "Mellkas",
+  "body_part.vitalis.left_arm": "Bal kar",
+  "body_part.vitalis.right_arm": "Jobb kar",
+  "body_part.vitalis.legs": "Lábak",
+
+  "medical.vitalis.bandage": "Kötszer",
+  "medical.vitalis.splint": "Sín",
+  "medical.vitalis.surgical_kit": "Sebészeti készlet",
+  "medical.vitalis.painkiller": "Fájdalomcsillapító",
+  "medical.vitalis.blood_bag": "Vértasak",
+
+  "message.vitalis.table_occupied": "Ez a műtőasztal már foglalt.",
+  "message.vitalis.surgery_started": "A műtét megkezdődött.",
+  "message.vitalis.patient_stabilized": "A beteg állapota stabilizálódott.",
+  "message.vitalis.not_enough_supplies": "Nincs elegendő orvosi felszerelés.",
+
+  "status.vitalis.healthy": "Egészséges",
+  "status.vitalis.fracture": "Törés",
+  "status.vitalis.open_fracture": "Nyílt törés",
+  "status.vitalis.bleeding": "Vérzés",
+  "status.vitalis.critical_bleeding": "Súlyos vérzés",
+  "status.vitalis.unconscious": "Eszméletlen",
+
+  "hud.vitalis.blood": "Vér",
+  "hud.vitalis.heart_rate": "Pulzus",
+  "hud.vitalis.condition": "Állapot",
+
+  "screen.vitalis.inventory": "Orvosi készlet",
+  "screen.vitalis.patient": "Beteg",
+  "screen.vitalis.treatment": "Kezelés",
+  "screen.vitalis.supplies": "Felszerelés",
+
+
+  "body_part.vitalis.abdomen": "Has",
+  "body_part.vitalis.left_leg": "Bal láb",
+  "body_part.vitalis.right_leg": "Jobb láb",
+
+  "status.vitalis.bullet_wound": "Lőtt seb",
+  "status.vitalis.cut": "Vágott seb",
+  "status.vitalis.burn": "Égés",
+
+  "item.vitalis.bandage": "Kötszer",
+  "item.vitalis.bandage.tooltip": "Kisebb vérzések és sebek ellátására.",
+
+  "item.vitalis.sterile_bandage": "Steril kötszer",
+  "item.vitalis.sterile_bandage.tooltip": "Sebek tiszta lezárására, fertőzésveszély csökkentésére.",
+
+  "item.vitalis.pressure_bandage": "Nyomókötés",
+  "item.vitalis.pressure_bandage.tooltip": "Erősebb vérzés ideiglenes csillapítására.",
+
+  "item.vitalis.tourniquet": "Leszorító",
+  "item.vitalis.tourniquet.tooltip": "Kritikus végtagvérzés megállítására.",
+
+  "item.vitalis.splint": "Sín",
+  "item.vitalis.splint.tooltip": "Törött kar vagy láb stabilizálására.",
+
+  "item.vitalis.cast": "Gipsz",
+  "item.vitalis.cast.tooltip": "Törések hosszabb távú rögzítésére.",
+
+  "item.vitalis.surgical_kit": "Sebészeti készlet",
+  "item.vitalis.surgical_kit.tooltip": "Komoly sérülések műtéti kezeléséhez.",
+
+  "item.vitalis.scalpel": "Szike",
+  "item.vitalis.scalpel.tooltip": "Sebészeti beavatkozások alapvető eszköze.",
+
+  "item.vitalis.forceps": "Sebészeti fogó",
+  "item.vitalis.forceps.tooltip": "Idegen testek vagy lövedékek eltávolításához.",
+
+  "item.vitalis.suture_kit": "Varrókészlet",
+  "item.vitalis.suture_kit.tooltip": "Sebek lezárására műtét után.",
+
+  "item.vitalis.painkiller": "Fájdalomcsillapító",
+  "item.vitalis.painkiller.tooltip": "Ideiglenesen csökkenti a sérülések hatását.",
+
+  "item.vitalis.morphine": "Morfium",
+  "item.vitalis.morphine.tooltip": "Erős fájdalomcsillapító súlyos sérülésekhez.",
+
+  "item.vitalis.antibiotic": "Antibiotikum",
+  "item.vitalis.antibiotic.tooltip": "Fertőzés kezelésére és megelőzésére.",
+
+  "item.vitalis.blood_bag": "Vértasak",
+  "item.vitalis.blood_bag.tooltip": "Vérveszteség pótlására.",
+
+  "item.vitalis.iv_set": "Infúziós szett",
+  "item.vitalis.iv_set.tooltip": "Vértasak vagy folyadék beadásához szükséges.",
+
+  "item.vitalis.vital_scanner": "Vital Scanner",
+  "item.vitalis.vital_scanner.tooltip": "Gyors diagnosztikai eszköz sérülések felmérésére.",
+
+  "screen.vitalis.required_supplies": "Szükséges alapanyagok",
+
+  "message.vitalis.surgery_finished": "A műtét sikeresen befejeződött."
 }

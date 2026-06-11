@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.16.3'
+    id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
     id 'maven-publish'
 }
 
@@ -45,10 +45,11 @@ repositories {
 dependencies {
     // Alap Minecraft és mappings
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.minecraft_version}+build.6:v2"
+    mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    // Fabric API. This is technically optional, but you probably want it anyway.
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
     // Cardinal Components API (entity komponensekhez)
     /*modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.0"

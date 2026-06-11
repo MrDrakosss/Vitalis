@@ -1,141 +1,134 @@
 package me.xavi.vitalis.medical;
 
+import me.xavi.vitalis.Vitalis;
+import me.xavi.vitalis.registry.ModParticles;
 import me.xavi.vitalis.util.SurgeryData;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 
-/**
- * Server-side per-tick logic for the medical system: applies blood loss
- * from bleeding injuries, and applies/refreshes status effects derived from
- * body part injury statuses and overall blood level.
- * <p>
- * Call {@link #tick(PlayerEntity)} once per player per server tick (20
- * ticks/second).
- */
 public final class MedicalSystem {
 
     private static final int TICKS_PER_SECOND = 20;
 
-    /** Reapply effects periodically so they don't expire mid-condition. */
-    private static final int EFFECT_REFRESH_INTERVAL_TICKS = 20;
-    private static final int EFFECT_DURATION_TICKS = 30; // slightly longer than the refresh interval
+    private static final ResourceLocation SLOW_MODIFIER_ID =
+            Vitalis.id("medical_leg_slow");
+
+    private static final double SLOW_ONE_LEG = -0.40D;
+    private static final double SLOW_BOTH_LEGS = -0.70D;
+    private static final double SLOW_UNCONSCIOUS = -0.90D;
 
     private MedicalSystem() {
     }
 
-    public static void tick(PlayerEntity player) {
+    public static void tick(Player player) {
         applyBleeding(player);
-
-        if (player.age % EFFECT_REFRESH_INTERVAL_TICKS == 0) {
-            applyInjuryEffects(player);
-            applyBloodLevelEffects(player);
-        }
+        applyMovementSlow(player);
     }
 
-    /** Reduces blood volume based on every body part's bleeding rate. */
-    private static void applyBleeding(PlayerEntity player) {
-        double mlPerSecond = 0.0;
+    private static void applyBleeding(Player player) {
+        double mlPerSecond = 0.0D;
+
         for (BodyPart part : BodyPart.VALUES) {
             InjuryStatus status = SurgeryData.getBodyPartStatus(player, part);
             mlPerSecond += status.getBleedRateMlPerSecond();
         }
 
-        if (mlPerSecond <= 0.0) return;
+        if (mlPerSecond > 0.0D) {
+            double mlPerTick = mlPerSecond / TICKS_PER_SECOND;
 
-        double mlPerTick = mlPerSecond / TICKS_PER_SECOND;
-        SurgeryData.addBloodMl(player, -mlPerTick);
+            SurgeryData.addBloodMl(player, -mlPerTick);
 
-        // Open fractures also slowly damage the affected body part itself
-        // (infection risk / continuous HP loss).
-        for (BodyPart part : BodyPart.VALUES) {
-            if (SurgeryData.getBodyPartStatus(player, part) == InjuryStatus.OPEN_FRACTURE) {
-                if (player.age % TICKS_PER_SECOND == 0) {
-                    SurgeryData.addBodyPartHp(player, part, -1);
+            if (player.tickCount % TICKS_PER_SECOND == 0) {
+                for (BodyPart part : BodyPart.VALUES) {
+                    if (SurgeryData.getBodyPartStatus(player, part) == InjuryStatus.OPEN_FRACTURE) {
+                        SurgeryData.addBodyPartHp(player, part, -1);
+                    }
                 }
+            }
+
+            if (player.level() instanceof ServerLevel serverLevel && player.tickCount % 6 == 0) {
+                serverLevel.sendParticles(
+                        ModParticles.BLOOD,
+                        player.getX(),
+                        player.getY() + 1.0D,
+                        player.getZ(),
+                        1,
+                        0.25D,
+                        0.35D,
+                        0.25D,
+                        0.02D
+                );
+            }
+        }
+
+        if (BloodLevel.fromMl(SurgeryData.getBloodMl(player)) == BloodLevel.DEAD) {
+            if (player.isAlive() && player.level() instanceof ServerLevel serverLevel) {
+                player.hurt(
+                        serverLevel.damageSources().magic(),
+                        Float.MAX_VALUE
+                );
             }
         }
     }
 
-    /** Applies vanilla status effects derived from each body part's injury status. */
-    private static void applyInjuryEffects(PlayerEntity player) {
-        boolean hasFracture = false;
-        boolean hasOpenFracture = false;
-        boolean hasBulletWound = false;
-        boolean hasBurn = false;
+    private static void applyMovementSlow(Player player) {
+        AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
 
-        for (BodyPart part : BodyPart.VALUES) {
-            InjuryStatus status = SurgeryData.getBodyPartStatus(player, part);
-            switch (status) {
-                case FRACTURE -> hasFracture = true;
-                case OPEN_FRACTURE -> hasOpenFracture = true;
-                case BULLET_WOUND -> hasBulletWound = true;
-                case BURN -> hasBurn = true;
-                default -> {
-                }
-            }
+        if (speed == null) {
+            return;
         }
 
-        // Fracture (closed or open): Slowness II, can't sprint (sprint is
-        // disabled by canceling sprint state), reduced jump height (Jump
-        // Boost with negative amplifier via Slowness substitute isn't
-        // directly possible, so we rely on Slowness + Mining Fatigue to
-        // emulate "can barely move").
-        if (hasFracture || hasOpenFracture) {
-            player.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.SLOWNESS, EFFECT_DURATION_TICKS, 1, true, true, true));
-            if (player.isSprinting()) {
-                player.setSprinting(false);
-            }
+        AttributeModifier existing = speed.getModifier(SLOW_MODIFIER_ID);
+
+        if (existing != null) {
+            speed.removeModifier(SLOW_MODIFIER_ID);
         }
 
-        // Bullet wound: shock state, represented as Weakness + Nausea.
-        if (hasBulletWound) {
-            player.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.WEAKNESS, EFFECT_DURATION_TICKS, 1, true, true, true));
-            player.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.NAUSEA, EFFECT_DURATION_TICKS, 0, true, true, true));
-        }
+        double slow = computeSlowAmount(player);
 
-        // Burn: long regeneration time, represented as a stacking Weakness
-        // (slows natural healing) - actual regen-rate hooks would need a
-        // mixin into player healing, left for a future pass.
-        if (hasBurn) {
-            player.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.WEAKNESS, EFFECT_DURATION_TICKS, 0, true, true, true));
+        if (slow < 0.0D) {
+            speed.addTransientModifier(
+                    new AttributeModifier(
+                            SLOW_MODIFIER_ID,
+                            slow,
+                            AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+                    )
+            );
         }
     }
 
-    /** Applies vanilla status effects derived from the player's overall blood level. */
-    private static void applyBloodLevelEffects(PlayerEntity player) {
-        double bloodMl = SurgeryData.getBloodMl(player);
-        BloodLevel level = BloodLevel.fromMl(bloodMl);
+    private static double computeSlowAmount(Player player) {
+        if (BloodLevel.fromMl(SurgeryData.getBloodMl(player)) == BloodLevel.UNCONSCIOUS) {
+            return SLOW_UNCONSCIOUS;
+        }
 
-        switch (level) {
-            case NORMAL -> {
-                // No special effects.
-            }
-            case WEAK -> player.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.WEAKNESS, EFFECT_DURATION_TICKS, 0, true, true, true));
-            case DIZZY -> {
-                player.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.WEAKNESS, EFFECT_DURATION_TICKS, 0, true, true, true));
-                player.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.NAUSEA, EFFECT_DURATION_TICKS, 0, true, true, true));
-            }
-            case UNCONSCIOUS -> {
-                player.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.BLINDNESS, EFFECT_DURATION_TICKS, 0, true, false, false));
-                player.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.SLOWNESS, EFFECT_DURATION_TICKS, 9, true, false, false));
-                player.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.WEAKNESS, EFFECT_DURATION_TICKS, 2, true, false, false));
-            }
-            case DEAD -> {
-                if (player.isAlive() && player.getEntityWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld) {
-                    player.damage(serverWorld, player.getDamageSources().magic(), Float.MAX_VALUE);
-                }
+        int brokenLegs = 0;
+
+        for (BodyPart leg : new BodyPart[]{
+                BodyPart.LEFT_LEG,
+                BodyPart.RIGHT_LEG
+        }) {
+            InjuryStatus status = SurgeryData.getBodyPartStatus(player, leg);
+
+            if (status == InjuryStatus.FRACTURE
+                    || status == InjuryStatus.OPEN_FRACTURE) {
+                brokenLegs++;
             }
         }
+
+        if (brokenLegs >= 2) {
+            return SLOW_BOTH_LEGS;
+        }
+
+        if (brokenLegs == 1) {
+            return SLOW_ONE_LEG;
+        }
+
+        return 0.0D;
     }
 }

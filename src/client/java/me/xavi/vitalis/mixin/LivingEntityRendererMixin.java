@@ -1,54 +1,48 @@
 package me.xavi.vitalis.mixin;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import me.xavi.vitalis.client.ClientSurgeryState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Rotates the local player's model to lie flat on top of the surgery table
- * while {@link ClientSurgeryState} is active. We avoid relying on vanilla's
- * bed-sleeping rotation (which depends on a real bed block at the entity's
- * sleeping position) and instead apply our own transform.
- */
 @Mixin(LivingEntityRenderer.class)
-public abstract class LivingEntityRendererMixin {
+public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> {
 
-    @Inject(method = "setupTransforms", at = @At("TAIL"))
-    private void vitalis$lyingDownTransform(LivingEntityRenderState state, MatrixStack matrices,
-                                             float bodyYaw, float baseHeight, CallbackInfo ci) {
-        if (!(state instanceof PlayerEntityRenderState playerState)) return;
-        if (!ClientSurgeryState.isActive()) return;
+    @Inject(
+            method = "setupRotations(Lnet/minecraft/world/entity/LivingEntity;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V",
+            at = @At("TAIL")
+    )
+    private void vitalis$lyingDownTransform(
+            T entity,
+            PoseStack poseStack,
+            float ageInTicks,
+            float rotationYaw,
+            float partialTick,
+            float scale,
+            CallbackInfo ci
+    ) {
+        if (!ClientSurgeryState.isActive()) {
+            return;
+        }
 
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null || playerState.id != client.player.getId()) return;
+        Minecraft client = Minecraft.getInstance();
 
-        // Lay the model down by rotating it 90 degrees around the
-        // entity's feet (the origin of this matrix stack at this point).
-        // The body then extends horizontally from the entity's actual
-        // position instead of floating away from it. The entity's actual
-        // yaw is kept server-authoritative and locked every tick (see
-        // Vitalis.java's tick lock and the fixed requestTeleport call), so
-        // we don't need to override bodyYaw here.
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0F));
-    }
+        if (client.player == null || entity.getId() != client.player.getId()) {
+            return;
+        }
 
-    @Inject(method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V", at = @At("TAIL"))
-    private void vitalis$hideCapeWhileLying(net.minecraft.entity.LivingEntity entity, LivingEntityRenderState state,
-                                             float tickDelta, CallbackInfo ci) {
-        if (!(state instanceof PlayerEntityRenderState playerState)) return;
-        if (!ClientSurgeryState.isActive()) return;
+        poseStack.mulPose(Axis.YP.rotationDegrees(-(180.0F - rotationYaw)));
 
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null || playerState.id != client.player.getId()) return;
+        float lockYaw = ClientSurgeryState.getLockYaw();
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - lockYaw));
 
-        playerState.capeVisible = false;
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
     }
 }

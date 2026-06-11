@@ -1,6 +1,6 @@
 {
   "textures": {
-    "particle": "vitalis:block/surgery_table_top"
+    "particle": "minecraft:block/bedrock"
   },
   "elements": []
 }

@@ -1,59 +1,72 @@
 package me.xavi.vitalis.client;
 
 import me.xavi.vitalis.client.input.OrbitCameraHandler;
-import me.xavi.vitalis.client.renderer.InjuryHologramFeatureRenderer;
+import me.xavi.vitalis.client.particle.BloodParticle;
+import me.xavi.vitalis.client.renderer.MedicalEffectsOverlay;
 import me.xavi.vitalis.client.renderer.MedicalStatusHud;
-import me.xavi.vitalis.network.MedicalStatePayload;
-import me.xavi.vitalis.network.SurgeryStatePayload;
+import me.xavi.vitalis.client.screen.SurgeryScreen;
 import me.xavi.vitalis.registry.ModNetwork;
+import me.xavi.vitalis.registry.ModParticles;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.Perspective;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.entity.player.PlayerEntity;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.player.Player;
 
 public class VitalisClient implements ClientModInitializer {
+
     @Override
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(ModNetwork.SURGERY_STATE, (payload, context) -> {
             context.client().execute(() -> {
-                PlayerEntity player = MinecraftClient.getInstance().player;
-                if (player == null) return;
+                Minecraft client = Minecraft.getInstance();
 
-                ClientSurgeryState.update(payload.tablePos(), payload.active(), payload.injuries());
+                ClientSurgeryState.update(
+                        payload.playerUuid(),
+                        payload.tablePos(),
+                        payload.active(),
+                        payload.injuries()
+                );
 
-                MinecraftClient client = MinecraftClient.getInstance();
+                if (client.player == null || !client.player.getUUID().equals(payload.playerUuid())) {
+                    return;
+                }
+
+                Player player = client.player;
+
                 if (payload.active()) {
-                    client.options.setPerspective(Perspective.THIRD_PERSON_BACK);
+                    client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
                     OrbitCameraHandler.activate(payload.tablePos(), player);
+                    client.setScreen(new SurgeryScreen());
                 } else {
                     OrbitCameraHandler.deactivate();
-                    client.options.setPerspective(Perspective.FIRST_PERSON);
+                    client.options.setCameraType(CameraType.FIRST_PERSON);
+
+                    if (client.screen instanceof SurgeryScreen) {
+                        client.setScreen(null);
+                    }
                 }
             });
         });
 
         ClientPlayNetworking.registerGlobalReceiver(ModNetwork.MEDICAL_STATE, (payload, context) -> {
-            context.client().execute(() ->
-                    ClientMedicalState.update(payload.bodyPartHp(), payload.bodyPartStatus(), payload.bloodMl()));
+            context.client().execute(() -> ClientMedicalState.update(
+                    payload.bodyPartHp(),
+                    payload.bodyPartStatus(),
+                    payload.bloodMl()
+            ));
         });
 
-        // Keep the perspective locked while the orbit camera is active.
-        // (Cursor recentering is handled inside OrbitCameraHandler.tick()
-        // itself, so it isn't done twice per frame.)
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            OrbitCameraHandler.enforcePerspective();
-        });
+        ClientTickEvents.END_CLIENT_TICK.register(client -> OrbitCameraHandler.enforcePerspective());
 
-        LivingEntityFeatureRendererRegistrationCallback.EVENT.register((entityType, entityRenderer, registrationHelper, context) -> {
-            if (entityRenderer instanceof PlayerEntityRenderer playerRenderer) {
-                registrationHelper.register(new InjuryHologramFeatureRenderer(playerRenderer));
-            }
-        });
+        ParticleFactoryRegistry.getInstance().register(
+                ModParticles.BLOOD,
+                BloodParticle.Provider::new
+        );
 
         MedicalStatusHud.register();
+        MedicalEffectsOverlay.register();
     }
 }

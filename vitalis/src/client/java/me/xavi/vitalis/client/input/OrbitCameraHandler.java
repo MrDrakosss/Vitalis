@@ -28,13 +28,13 @@ public class OrbitCameraHandler {
     private static float yaw = 0;
 
     /** Constant downward look angle (degrees). Higher = looking more straight down. */
-    private static final float PITCH = 25.0f;
+    private static final float PITCH = 0.0f;
 
     /** Orbit radius around the pivot, in blocks. */
     private static final float ORBIT_RADIUS = 3.0f;
 
     /** Pivot height above the table-top/lock position, in blocks. */
-    private static final double PIVOT_HEIGHT_ABOVE_LOCK = 1.0;
+    private static final double PIVOT_HEIGHT_ABOVE_LOCK = 0.5;
 
     private static final float MIN_DISTANCE = 0.3f;
     private static final float COLLISION_MARGIN = 0.2f;

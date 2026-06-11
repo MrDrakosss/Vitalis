@@ -86,7 +86,5 @@ public class MedicalStatusHud {
         int width = textRenderer.getWidth(text);
         int x = screenWidth - MARGIN_RIGHT - width;
         context.drawText(textRenderer, text, x, y, color, true);
-        System.out.println("Width: "+ width);
-        System.out.println("X: "+ x);
     }
 }

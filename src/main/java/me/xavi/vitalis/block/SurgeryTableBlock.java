@@ -37,10 +37,34 @@ public class SurgeryTableBlock extends Block implements EntityBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<BedPart> PART = EnumProperty.create("part", BedPart.class);
 
-    public static final double TABLE_SURFACE_HEIGHT = 1.08D;
+    public static final double TABLE_SURFACE_HEIGHT = 1.0D;
 
     private static final VoxelShape SHAPE =
             Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+
+    private static final VoxelShape FOOT_SHAPE_NORTH = Shapes.or(
+            Block.box(3, 0, 0, 13, 2, 16),
+            Block.box(5, 2, 4, 11, 6, 16),
+            Block.box(4, 6, 3, 12, 10, 16),
+            Block.box(0, 10, 3, 16, 13, 16)
+    );
+
+    private static final VoxelShape HEAD_SHAPE_NORTH = Shapes.or(
+            Block.box(3, 0, 0, 13, 2, 16),
+            Block.box(5, 2, 0, 11, 6, 15),
+            Block.box(4, 6, 0, 12, 10, 16),
+            Block.box(0, 10, 0, 16, 13, 16),
+            Block.box(3, 7, 0, 13, 11, 8),
+            Block.box(6, 4, 0, 10, 7, 8)
+    );
+
+    private static final VoxelShape FOOT_SHAPE_SOUTH = rotateShape180(FOOT_SHAPE_NORTH);
+    private static final VoxelShape FOOT_SHAPE_EAST = rotateShape90(FOOT_SHAPE_NORTH);
+    private static final VoxelShape FOOT_SHAPE_WEST = rotateShape270(FOOT_SHAPE_NORTH);
+
+    private static final VoxelShape HEAD_SHAPE_SOUTH = rotateShape180(HEAD_SHAPE_NORTH);
+    private static final VoxelShape HEAD_SHAPE_EAST = rotateShape90(HEAD_SHAPE_NORTH);
+    private static final VoxelShape HEAD_SHAPE_WEST = rotateShape270(HEAD_SHAPE_NORTH);
 
     public SurgeryTableBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -126,7 +150,7 @@ public class SurgeryTableBlock extends Block implements EntityBlock {
             BlockPos pos,
             CollisionContext context
     ) {
-        return SHAPE;
+        return getTableShape(state);
     }
 
     @Override
@@ -136,7 +160,50 @@ public class SurgeryTableBlock extends Block implements EntityBlock {
             BlockPos pos,
             CollisionContext context
     ) {
-        return SHAPE;
+        return getTableShape(state);
+    }
+
+    private static VoxelShape getTableShape(BlockState state) {
+        BedPart part = state.getValue(PART);
+        Direction facing = state.getValue(FACING);
+
+        boolean head = part == BedPart.HEAD;
+
+        return switch (facing) {
+            case NORTH -> head ? HEAD_SHAPE_NORTH : FOOT_SHAPE_NORTH;
+            case SOUTH -> head ? HEAD_SHAPE_SOUTH : FOOT_SHAPE_SOUTH;
+            case EAST -> head ? HEAD_SHAPE_EAST : FOOT_SHAPE_EAST;
+            case WEST -> head ? HEAD_SHAPE_WEST : FOOT_SHAPE_WEST;
+            default -> head ? HEAD_SHAPE_NORTH : FOOT_SHAPE_NORTH;
+        };
+    }
+
+    private static VoxelShape rotateShape90(VoxelShape shape) {
+        VoxelShape[] buffer = new VoxelShape[]{Shapes.empty()};
+
+        shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+            buffer[0] = Shapes.or(
+                    buffer[0],
+                    Shapes.box(
+                            1.0D - maxZ,
+                            minY,
+                            minX,
+                            1.0D - minZ,
+                            maxY,
+                            maxX
+                    )
+            );
+        });
+
+        return buffer[0];
+    }
+
+    private static VoxelShape rotateShape180(VoxelShape shape) {
+        return rotateShape90(rotateShape90(shape));
+    }
+
+    private static VoxelShape rotateShape270(VoxelShape shape) {
+        return rotateShape90(rotateShape180(shape));
     }
 
     @Override
@@ -230,9 +297,9 @@ public class SurgeryTableBlock extends Block implements EntityBlock {
 
         Direction facing = headState.getValue(FACING);
 
-        double x = headPos.getX() + 0.5D + facing.getStepX() * 1.0D;
+        double x = headPos.getX() + 0.5D + (facing.getStepX() * 1.25D);
         double y = headPos.getY() + TABLE_SURFACE_HEIGHT;
-        double z = headPos.getZ() + 0.5D + facing.getStepZ() * 1.0D;
+        double z = headPos.getZ() + 0.5D + facing.getStepZ() * 1.25D;
 
         float yaw = switch (facing) {
             case SOUTH -> 0.0F;

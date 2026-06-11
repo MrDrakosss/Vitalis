@@ -30,7 +30,7 @@ public abstract class EntityRenderDispatcherMixin {
             float size,
             CallbackInfo ci
     ) {
-        if (entity instanceof Player player && ClientSurgeryState.isActive()) {
+        if (ClientSurgeryState.isActive()) {
             ci.cancel();
         }
     }

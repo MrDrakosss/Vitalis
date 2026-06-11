@@ -9,9 +9,11 @@ import me.xavi.vitalis.network.SurgeryActionPayload;
 import me.xavi.vitalis.network.SurgeryLeavePayload;
 import me.xavi.vitalis.registry.ModItems;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -154,6 +156,7 @@ public class SurgeryScreen extends Screen {
         renderLeftPanel(graphics);
         renderSurgeryStartInventory(graphics);
         renderMedicalInventory(graphics);
+        renderPatientPreview(graphics);
 
         super.render(graphics, mouseX, mouseY, partialTick);
 
@@ -353,6 +356,42 @@ public class SurgeryScreen extends Screen {
 
             lineY += 18;
         }
+    }
+
+    private void renderPatientPreview(GuiGraphics graphics) {
+        Minecraft client = Minecraft.getInstance();
+
+        if (client.player == null) {
+            return;
+        }
+
+        int x = this.width - 95;
+        int y = 92;
+
+        graphics.fill(x - 35, y - 72, x + 35, y + 12, 0xAA0B1018);
+        graphics.fill(x - 34, y - 71, x + 34, y + 11, 0x55202A36);
+
+        graphics.drawString(
+                this.font,
+                Component.translatable("screen.vitalis.patient"),
+                x - 24,
+                y - 66,
+                0xFFFFFFFF,
+                false
+        );
+
+        InventoryScreen.renderEntityInInventoryFollowsMouse(
+                graphics,
+                x,
+                y,
+                32,
+                x,
+                y,
+                1f,
+                1f,
+                1f,
+                client.player
+        );
     }
 
     private void renderMedicalInventory(GuiGraphics graphics) {

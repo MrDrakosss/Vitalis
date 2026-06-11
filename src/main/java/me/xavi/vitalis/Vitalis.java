@@ -78,8 +78,8 @@ public class Vitalis implements ModInitializer {
                 if (tableState.getBlock() == ModBlocks.SURGERY_TABLE) {
                     Direction facing = tableState.getValue(SurgeryTableBlock.FACING);
 
-                    offX = facing.getStepX() * 1.0D;
-                    offZ = facing.getStepZ() * 1.0D;
+                    offX = facing.getStepX() * 1.25D;
+                    offZ = facing.getStepZ() * 1.25D;
                 }
 
                 double x = lockPos.getX() + 0.5D + offX;

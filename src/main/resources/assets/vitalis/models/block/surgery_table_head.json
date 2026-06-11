@@ -3,8 +3,8 @@
 	"credit": "MadewithBlockbench",
 	"texture_size": [128, 128],
 	"textures": {
-		"0": "vitalis:block/hospital_ambulance_bed",
-		"particle": "vitalis:block/hospital_ambulance_bed"
+		"0": "vitalis:block/surgery_table_top",
+		"particle": "vitalis:block/surgery_table_top"
 	},
 	"elements": [
 		{
@@ -60,9 +60,9 @@
 			}
 		},
 		{
-			"from": [6, 9, -5.92284],
-			"to": [10, 10, 6],
-			"rotation": {"x": 180, "y": 0, "z": 180, "origin": [8, 7.00882, 12.89078]},
+			"from": [6, 9, -6.92284],
+			"to": [10, 10, 5],
+			"rotation": {"x": 180, "y": 0, "z": 180, "origin": [8, 7.00882, 11.89078]},
 			"faces": {
 				"north": {"uv": [2.875, 7.375, 3.375, 7.5], "texture": "#0"},
 				"east": {"uv": [4, 6.125, 5.5, 6.25], "texture": "#0"},
@@ -79,7 +79,6 @@
 			"faces": {
 				"north": {"uv": [6.5, 3, 8.25, 3.375], "texture": "#0"},
 				"east": {"uv": [4.75, 6.5, 6.25, 6.875], "texture": "#0"},
-				"south": {"uv": [6.5, 3.375, 8.25, 3.75], "texture": "#0"},
 				"west": {"uv": [6.25, 6.5, 7.75, 6.875], "texture": "#0"},
 				"up": {"uv": [5.75, 1.5, 4, 0], "texture": "#0"},
 				"down": {"uv": [6, 1.5, 4.25, 3], "texture": "#0"}

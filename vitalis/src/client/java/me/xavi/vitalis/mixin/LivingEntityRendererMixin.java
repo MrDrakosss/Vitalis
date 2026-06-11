@@ -37,7 +37,7 @@ public abstract class LivingEntityRendererMixin {
         // yaw is kept server-authoritative and locked every tick (see
         // Vitalis.java's tick lock and the fixed requestTeleport call), so
         // we don't need to override bodyYaw here.
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90.0F));
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0F));
     }
 
     @Inject(method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V", at = @At("TAIL"))

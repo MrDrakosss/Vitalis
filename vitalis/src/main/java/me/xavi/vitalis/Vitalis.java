@@ -66,9 +66,12 @@ public class Vitalis implements ModInitializer {
                 double dy = player.getY() - y;
                 double dz = player.getZ() - z;
                 boolean drifted = (dx * dx + dy * dy + dz * dz) > 0.0025;
-                boolean rotated = Math.abs(player.getYaw() - yaw) > 0.5f
+                /*boolean rotated = Math.abs(player.getYaw() - yaw) > 0.5f
                         || Math.abs(player.getBodyYaw() - yaw) > 0.5f
-                        || Math.abs(player.getPitch()) > 0.5f;
+                        || Math.abs(player.getPitch()) > 0.5f;*/
+
+                boolean rotated = false;
+
 
                 if (drifted || rotated) {
                     if (player instanceof ServerPlayerEntity serverPlayer) {

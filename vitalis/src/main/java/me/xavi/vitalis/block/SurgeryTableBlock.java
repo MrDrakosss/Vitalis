@@ -134,7 +134,6 @@ public class SurgeryTableBlock extends Block implements BlockEntityProvider {
     }
 
     private void lieDown(BlockState headState, BlockPos headPos, PlayerEntity player) {
-        System.out.println("lieDown");
         Direction facing = headState.get(FACING);
 
         // The HEAD block is where the player's head goes; the body extends
@@ -156,7 +155,7 @@ public class SurgeryTableBlock extends Block implements BlockEntityProvider {
         };
 
         player.setSneaking(false);
-        //player.setPose(EntityPose.SLEEPING);
+        player.setPose(EntityPose.SLEEPING);
 
         SurgeryData.setOnTable(player, true);
         SurgeryData.setTablePos(player, headPos);
@@ -184,7 +183,6 @@ public class SurgeryTableBlock extends Block implements BlockEntityProvider {
         SurgeryData.setInjury(player, "legs", 0.50f);
 
         sendState(player, headPos, true);
-        System.out.println(player.getEntityPos());
     }
 
     /** Called both when healing on a second use, and when the player gets up via shift. */

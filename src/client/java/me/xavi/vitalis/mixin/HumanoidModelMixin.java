@@ -22,7 +22,7 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> {
     @Final
     public ModelPart hat;
 
-    private static final float HEAD_REST_ANGLE = (float) Math.toRadians(-30.0D);
+    private static final float HEAD_REST_ANGLE = (float) Math.toRadians(30.0D);
 
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
     private void vitalis$raiseHeadOnSurgeryTable(

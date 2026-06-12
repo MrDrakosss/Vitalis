@@ -1,10 +1,12 @@
 package me.xavi.vitalis.client;
 
+import me.xavi.vitalis.block.SurgeryTableBlock;
 import me.xavi.vitalis.client.input.OrbitCameraHandler;
 import me.xavi.vitalis.client.particle.BloodParticle;
 import me.xavi.vitalis.client.renderer.MedicalEffectsOverlay;
 import me.xavi.vitalis.client.renderer.MedicalStatusHud;
 import me.xavi.vitalis.client.screen.SurgeryScreen;
+import me.xavi.vitalis.registry.ModBlocks;
 import me.xavi.vitalis.registry.ModNetwork;
 import me.xavi.vitalis.registry.ModParticles;
 import net.fabricmc.api.ClientModInitializer;
@@ -13,7 +15,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class VitalisClient implements ClientModInitializer {
 
@@ -37,8 +41,24 @@ public class VitalisClient implements ClientModInitializer {
                 Player player = client.player;
 
                 if (payload.active()) {
+                    Direction facing = Direction.NORTH;
+
+                    if (client.level != null) {
+                        BlockState state = client.level.getBlockState(payload.tablePos());
+
+                        if (state.getBlock() == ModBlocks.SURGERY_TABLE) {
+                            facing = state.getValue(SurgeryTableBlock.FACING);
+                        }
+                    }
+
                     client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
-                    OrbitCameraHandler.activate(payload.tablePos(), player);
+
+                    OrbitCameraHandler.activate(
+                            payload.tablePos(),
+                            facing,
+                            player
+                    );
+
                     client.setScreen(new SurgeryScreen());
                 } else {
                     OrbitCameraHandler.deactivate();
@@ -66,7 +86,7 @@ public class VitalisClient implements ClientModInitializer {
                 BloodParticle.Provider::new
         );
 
-        MedicalStatusHud.register();
         MedicalEffectsOverlay.register();
+        MedicalStatusHud.register();
     }
 }

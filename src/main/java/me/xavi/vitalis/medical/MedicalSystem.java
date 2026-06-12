@@ -10,6 +10,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 
 public final class MedicalSystem {
 
@@ -28,6 +29,70 @@ public final class MedicalSystem {
     public static void tick(Player player) {
         applyBleeding(player);
         applyMovementSlow(player);
+        applyBrokenLegJumpLimit(player);
+    }
+
+    private static final double BROKEN_LEG_MAX_JUMP_VELOCITY = 0.16D;
+
+    private static void applyBrokenLegJumpLimit(Player player) {
+        int brokenLegs = brokenLegCount(player);
+
+        if (brokenLegs <= 0) {
+            return;
+        }
+
+        Vec3 movement = player.getDeltaMovement();
+
+        if (brokenLegs >= 2) {
+            if (movement.y > 0.0D) {
+                player.setDeltaMovement(
+                        movement.x,
+                        0.0D,
+                        movement.z
+                );
+
+                player.hurtMarked = true;
+            }
+
+            return;
+        }
+
+        if (movement.y > 0.16D) {
+            player.setDeltaMovement(
+                    movement.x,
+                    0.16D,
+                    movement.z
+            );
+
+            player.hurtMarked = true;
+        }
+    }
+
+    private static int brokenLegCount(Player player) {
+        int count = 0;
+
+        InjuryStatus leftLeg = SurgeryData.getBodyPartStatus(player, BodyPart.LEFT_LEG);
+        InjuryStatus rightLeg = SurgeryData.getBodyPartStatus(player, BodyPart.RIGHT_LEG);
+
+        if (leftLeg == InjuryStatus.FRACTURE || leftLeg == InjuryStatus.OPEN_FRACTURE) {
+            count++;
+        }
+
+        if (rightLeg == InjuryStatus.FRACTURE || rightLeg == InjuryStatus.OPEN_FRACTURE) {
+            count++;
+        }
+
+        return count;
+    }
+
+    private static boolean hasBrokenLeg(Player player) {
+        InjuryStatus leftLeg = SurgeryData.getBodyPartStatus(player, BodyPart.LEFT_LEG);
+        InjuryStatus rightLeg = SurgeryData.getBodyPartStatus(player, BodyPart.RIGHT_LEG);
+
+        return leftLeg == InjuryStatus.FRACTURE
+                || leftLeg == InjuryStatus.OPEN_FRACTURE
+                || rightLeg == InjuryStatus.FRACTURE
+                || rightLeg == InjuryStatus.OPEN_FRACTURE;
     }
 
     private static void applyBleeding(Player player) {

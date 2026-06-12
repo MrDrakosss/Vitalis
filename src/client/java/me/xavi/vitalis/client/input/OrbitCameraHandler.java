@@ -1,11 +1,13 @@
 package me.xavi.vitalis.client.input;
 
+import me.xavi.vitalis.block.SurgeryTableBlock;
 import me.xavi.vitalis.mixin.CameraAccessor;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
@@ -35,14 +37,14 @@ public class OrbitCameraHandler {
         return active;
     }
 
-    public static void activate(BlockPos pos, Player player) {
+    public static void activate(BlockPos pos, Direction facing, Player player) {
         active = true;
         yaw = player.getYRot();
 
-        pivot = new Vec3(
-                pos.getX() + 0.5D,
-                pos.getY() + PIVOT_HEIGHT,
-                pos.getZ() + 0.5D
+        pivot = Vec3.atCenterOf(pos).add(
+                facing.getStepX() * 0.4D,
+                PIVOT_HEIGHT,
+                facing.getStepZ() * 0.4D
         );
     }
 

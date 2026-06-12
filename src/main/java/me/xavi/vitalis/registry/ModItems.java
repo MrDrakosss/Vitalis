@@ -1,6 +1,8 @@
 package me.xavi.vitalis.registry;
 
 import me.xavi.vitalis.Vitalis;
+import me.xavi.vitalis.item.AdrenalineItem;
+import me.xavi.vitalis.item.EnergyDrinkItem;
 import me.xavi.vitalis.item.MedicalItem;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
@@ -138,6 +140,44 @@ public final class ModItems {
             )
     );
 
+    public static final Item ENERGY_DRINK = register(
+            "energy_drink",
+            new EnergyDrinkItem(
+                    new Item.Properties().stacksTo(16)
+            )
+    );
+
+    public static final Item ADRENALINE = register(
+            "adrenaline",
+            new AdrenalineItem(
+                    new Item.Properties().stacksTo(8)
+            )
+    );
+
+    public static final Item DEFIBRILLATOR = register(
+            "defibrillator",
+            new MedicalItem(
+                    new Item.Properties().stacksTo(1).durability(16),
+                    "item.vitalis.defibrillator.tooltip"
+            )
+    );
+
+    public static final Item CPR_KIT = register(
+            "cpr_kit",
+            new MedicalItem(
+                    new Item.Properties().stacksTo(4),
+                    "item.vitalis.cpr_kit.tooltip"
+            )
+    );
+
+    public static final Item OXYGEN_MASK = register(
+            "oxygen_mask",
+            new MedicalItem(
+                    new Item.Properties().stacksTo(8),
+                    "item.vitalis.oxygen_mask.tooltip"
+            )
+    );
+
     private ModItems() {
     }
 
@@ -167,6 +207,11 @@ public final class ModItems {
             entries.accept(BLOOD_BAG);
             entries.accept(IV_SET);
             entries.accept(VITAL_SCANNER);
+            entries.accept(ENERGY_DRINK);
+            entries.accept(ADRENALINE);
+            entries.accept(DEFIBRILLATOR);
+            entries.accept(CPR_KIT);
+            entries.accept(OXYGEN_MASK);
         });
     }
 }

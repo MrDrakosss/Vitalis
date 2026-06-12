@@ -2,7 +2,8 @@ package me.xavi.vitalis.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import me.xavi.vitalis.client.ClientSurgeryState;
+import me.xavi.vitalis.client.state.ClientDownedState;
+import me.xavi.vitalis.client.state.ClientSurgeryState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -28,13 +29,20 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
             float scale,
             CallbackInfo ci
     ) {
-        if (!ClientSurgeryState.isLying(entity.getUUID())) {
+        Minecraft client = Minecraft.getInstance();
+
+        boolean isLocalPlayerDowned =
+                client.player != null
+                        && entity.getId() == client.player.getId()
+                        && ClientDownedState.isActive();
+
+        if (isLocalPlayerDowned) {
+            poseStack.mulPose(Axis.YP.rotationDegrees(-(180.0F - rotationYaw)));
+            poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
             return;
         }
 
-        Minecraft client = Minecraft.getInstance();
-
-        if (client.level == null) {
+        if (!ClientSurgeryState.isLying(entity.getUUID())) {
             return;
         }
 

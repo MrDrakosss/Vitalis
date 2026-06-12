@@ -1,11 +1,11 @@
 package me.xavi.vitalis.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.xavi.vitalis.client.ClientSurgeryState;
+import me.xavi.vitalis.client.state.ClientDownedState;
+import me.xavi.vitalis.client.state.ClientSurgeryState;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelReader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,6 +31,10 @@ public abstract class EntityRenderDispatcherMixin {
             CallbackInfo ci
     ) {
         if (ClientSurgeryState.isActive()) {
+            ci.cancel();
+        }
+
+        if (ClientDownedState.isActive()) {
             ci.cancel();
         }
     }

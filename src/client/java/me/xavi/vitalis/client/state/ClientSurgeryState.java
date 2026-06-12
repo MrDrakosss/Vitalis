@@ -1,4 +1,4 @@
-package me.xavi.vitalis.client;
+package me.xavi.vitalis.client.state;
 
 import me.xavi.vitalis.block.SurgeryTableBlock;
 import me.xavi.vitalis.medical.BodyPart;

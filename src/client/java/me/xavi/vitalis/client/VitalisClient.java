@@ -5,7 +5,12 @@ import me.xavi.vitalis.client.input.OrbitCameraHandler;
 import me.xavi.vitalis.client.particle.BloodParticle;
 import me.xavi.vitalis.client.renderer.MedicalEffectsOverlay;
 import me.xavi.vitalis.client.renderer.MedicalStatusHud;
+import me.xavi.vitalis.client.screen.DownedScreen;
 import me.xavi.vitalis.client.screen.SurgeryScreen;
+import me.xavi.vitalis.client.state.ClientDownedState;
+import me.xavi.vitalis.client.state.ClientMedicalState;
+import me.xavi.vitalis.client.state.ClientSurgeryState;
+import me.xavi.vitalis.client.state.ClientSurgeryTreatmentState;
 import me.xavi.vitalis.registry.ModBlocks;
 import me.xavi.vitalis.registry.ModNetwork;
 import me.xavi.vitalis.registry.ModParticles;
@@ -53,7 +58,7 @@ public class VitalisClient implements ClientModInitializer {
 
                     client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
 
-                    OrbitCameraHandler.activate(
+                    OrbitCameraHandler.activateTable(
                             payload.tablePos(),
                             facing,
                             player
@@ -75,7 +80,10 @@ public class VitalisClient implements ClientModInitializer {
             context.client().execute(() -> ClientMedicalState.update(
                     payload.bodyPartHp(),
                     payload.bodyPartStatus(),
-                    payload.bloodMl()
+                    payload.bloodMl(),
+                    payload.heartRate(),
+                    payload.bloodPressureSystolic(),
+                    payload.bloodPressureDiastolic()
             ));
         });
 
@@ -85,6 +93,41 @@ public class VitalisClient implements ClientModInitializer {
                 ModParticles.BLOOD,
                 BloodParticle.Provider::new
         );
+
+        ClientPlayNetworking.registerGlobalReceiver(ModNetwork.SURGERY_TREATMENT, (payload, context) -> {
+            context.client().execute(() -> ClientSurgeryTreatmentState.update(
+                    payload.active(),
+                    payload.progressTicks(),
+                    payload.totalTicks()
+            ));
+        });
+
+        // Egyedi halál
+        ClientPlayNetworking.registerGlobalReceiver(ModNetwork.DOWNED_STATE, (payload, context) -> {
+            context.client().execute(() -> {
+                Minecraft client = Minecraft.getInstance();
+
+                ClientDownedState.update(payload.active(), payload.remainingTicks());
+
+                if (payload.active()) {
+                    client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+
+                    if (!OrbitCameraHandler.isDownedMode()) {
+                        OrbitCameraHandler.activateDowned(client.player);
+                    }
+
+                    if (!(client.screen instanceof DownedScreen)) {
+                        client.setScreen(new DownedScreen());
+                    }
+                } else {
+                    OrbitCameraHandler.deactivate();
+
+                    if (client.screen instanceof DownedScreen) {
+                        client.setScreen(null);
+                    }
+                }
+            });
+        });
 
         MedicalEffectsOverlay.register();
         MedicalStatusHud.register();

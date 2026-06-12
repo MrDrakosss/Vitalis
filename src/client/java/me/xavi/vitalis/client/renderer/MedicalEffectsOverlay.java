@@ -1,6 +1,6 @@
 package me.xavi.vitalis.client.renderer;
 
-import me.xavi.vitalis.client.ClientMedicalState;
+import me.xavi.vitalis.client.state.ClientMedicalState;
 import me.xavi.vitalis.medical.BloodLevel;
 import me.xavi.vitalis.medical.BodyPart;
 import me.xavi.vitalis.medical.InjuryStatus;

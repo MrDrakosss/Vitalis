@@ -1,7 +1,8 @@
 package me.xavi.vitalis.client.renderer;
 
-import me.xavi.vitalis.client.ClientMedicalState;
-import me.xavi.vitalis.client.ClientSurgeryState;
+import me.xavi.vitalis.client.state.ClientDownedState;
+import me.xavi.vitalis.client.state.ClientMedicalState;
+import me.xavi.vitalis.client.state.ClientSurgeryState;
 import me.xavi.vitalis.medical.BloodLevel;
 import me.xavi.vitalis.medical.BodyPart;
 import me.xavi.vitalis.medical.InjuryStatus;
@@ -33,6 +34,9 @@ public class MedicalStatusHud {
         }
 
         if (ClientSurgeryState.isActive()) {
+            return;
+        }
+        if (ClientDownedState.isActive()) {
             return;
         }
         renderPlayerSkinPreview(graphics, client.player);
@@ -113,6 +117,27 @@ public class MedicalStatusHud {
 
         graphics.drawString(client.font, bloodText, X, textY, bloodColor(), true);
         graphics.drawString(client.font, conditionText, X, textY + 11, conditionColor(), true);
+
+        graphics.drawString(
+                client.font,
+                "Pulzus: " + ClientMedicalState.getHeartRate() + " BPM",
+                X,
+                textY + 22,
+                0xFFFFFFFF,
+                true
+        );
+
+        graphics.drawString(
+                client.font,
+                "Vérnyomás: "
+                        + ClientMedicalState.getBloodPressureSystolic()
+                        + "/"
+                        + ClientMedicalState.getBloodPressureDiastolic(),
+                X,
+                textY + 33,
+                0xFFFFFFFF,
+                true
+        );
     }
 
     private static void drawOutlinedTintedSkinPart(

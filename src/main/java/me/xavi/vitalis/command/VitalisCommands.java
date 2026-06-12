@@ -42,6 +42,37 @@ public final class VitalisCommands {
                 Commands.literal("vitalis")
                         .requires(source -> source.hasPermission(2))
 
+                        // TODO Törölni fejlesztés után
+                        .then(Commands.literal("test-data")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(context -> {
+                                            ServerPlayer player = EntityArgument.getPlayer(context, "player");
+
+                                            SurgeryData.setBodyPartHp(player, BodyPart.HEAD, 75);
+                                            SurgeryData.setBodyPartHp(player, BodyPart.CHEST, 85);
+                                            SurgeryData.setBodyPartHp(player, BodyPart.ABDOMEN, 90);
+                                            SurgeryData.setBodyPartHp(player, BodyPart.LEFT_ARM, 70);
+                                            SurgeryData.setBodyPartHp(player, BodyPart.RIGHT_ARM, 100);
+                                            SurgeryData.setBodyPartHp(player, BodyPart.LEFT_LEG, 35);
+                                            SurgeryData.setBodyPartHp(player, BodyPart.RIGHT_LEG, 60);
+
+                                            SurgeryData.setBodyPartStatus(player, BodyPart.HEAD, InjuryStatus.NONE);
+                                            SurgeryData.setBodyPartStatus(player, BodyPart.CHEST, InjuryStatus.CUT);
+                                            SurgeryData.setBodyPartStatus(player, BodyPart.ABDOMEN, InjuryStatus.NONE);
+                                            SurgeryData.setBodyPartStatus(player, BodyPart.LEFT_ARM, InjuryStatus.CUT);
+                                            SurgeryData.setBodyPartStatus(player, BodyPart.RIGHT_ARM, InjuryStatus.NONE);
+                                            SurgeryData.setBodyPartStatus(player, BodyPart.LEFT_LEG, InjuryStatus.FRACTURE);
+                                            SurgeryData.setBodyPartStatus(player, BodyPart.RIGHT_LEG, InjuryStatus.NONE);
+                                            SurgeryData.setBloodMl(player, 4300.0D);
+
+                                            context.getSource().sendSuccess(
+                                                    () -> Component.literal("§aTest data's set for " + player.getName().getString() + "."),
+                                                    true
+                                            );
+
+                                            return 1;
+                                        })))
+
                         .then(Commands.literal("sethp")
                                 .then(Commands.argument("player", EntityArgument.player())
                                         .then(Commands.argument("bodyPart", StringArgumentType.word())

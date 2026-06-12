@@ -328,7 +328,7 @@ public class SurgeryTableBlock extends Block implements EntityBlock {
         player.setYBodyRot(yaw);
         player.setYHeadRot(yaw);
 
-        SurgeryData.setBodyPartHp(player, BodyPart.HEAD, 75);
+        /*SurgeryData.setBodyPartHp(player, BodyPart.HEAD, 75);
         SurgeryData.setBodyPartHp(player, BodyPart.CHEST, 85);
         SurgeryData.setBodyPartHp(player, BodyPart.ABDOMEN, 90);
         SurgeryData.setBodyPartHp(player, BodyPart.LEFT_ARM, 70);
@@ -343,7 +343,7 @@ public class SurgeryTableBlock extends Block implements EntityBlock {
         SurgeryData.setBodyPartStatus(player, BodyPart.RIGHT_ARM, InjuryStatus.NONE);
         SurgeryData.setBodyPartStatus(player, BodyPart.LEFT_LEG, InjuryStatus.FRACTURE);
         SurgeryData.setBodyPartStatus(player, BodyPart.RIGHT_LEG, InjuryStatus.NONE);
-        SurgeryData.setBloodMl(player, 4300.0D);
+        SurgeryData.setBloodMl(player, 4300.0D);*/
 
         sendState(player, headPos, true);
     }

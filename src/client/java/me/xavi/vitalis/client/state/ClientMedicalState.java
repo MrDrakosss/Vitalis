@@ -1,4 +1,4 @@
-package me.xavi.vitalis.client;
+package me.xavi.vitalis.client.state;
 
 import me.xavi.vitalis.medical.BloodLevel;
 import me.xavi.vitalis.medical.BodyPart;
@@ -10,6 +10,10 @@ public final class ClientMedicalState {
     private static final InjuryStatus[] BODY_PART_STATUS = new InjuryStatus[BodyPart.VALUES.length];
 
     private static double bloodMl = BloodLevel.MAX_BLOOD_ML;
+
+    private static int heartRate = 75;
+    private static int bloodPressureSystolic = 120;
+    private static int bloodPressureDiastolic = 80;
 
     static {
         reset();
@@ -25,9 +29,19 @@ public final class ClientMedicalState {
         }
 
         bloodMl = BloodLevel.MAX_BLOOD_ML;
+        heartRate = 75;
+        bloodPressureSystolic = 120;
+        bloodPressureDiastolic = 80;
     }
 
-    public static void update(int[] hp, int[] status, double newBloodMl) {
+    public static void update(
+            int[] hp,
+            int[] status,
+            double newBloodMl,
+            int newHeartRate,
+            int newBloodPressureSystolic,
+            int newBloodPressureDiastolic
+    ) {
         for (int i = 0; i < BodyPart.VALUES.length; i++) {
             BODY_PART_HP[i] = i < hp.length
                     ? hp[i]
@@ -41,6 +55,9 @@ public final class ClientMedicalState {
         }
 
         bloodMl = newBloodMl;
+        heartRate = newHeartRate;
+        bloodPressureSystolic = newBloodPressureSystolic;
+        bloodPressureDiastolic = newBloodPressureDiastolic;
     }
 
     public static int getHp(BodyPart part) {
@@ -57,6 +74,18 @@ public final class ClientMedicalState {
 
     public static BloodLevel getBloodLevel() {
         return BloodLevel.fromMl(bloodMl);
+    }
+
+    public static int getHeartRate() {
+        return heartRate;
+    }
+
+    public static int getBloodPressureSystolic() {
+        return bloodPressureSystolic;
+    }
+
+    public static int getBloodPressureDiastolic() {
+        return bloodPressureDiastolic;
     }
 
     public static boolean needsSurgery(BodyPart part) {

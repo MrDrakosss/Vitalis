@@ -1,6 +1,8 @@
 package me.xavi.vitalis.mixin;
 
-import me.xavi.vitalis.client.ClientSurgeryState;
+import com.mojang.math.Axis;
+import me.xavi.vitalis.client.state.ClientDownedState;
+import me.xavi.vitalis.client.state.ClientSurgeryState;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,6 +37,10 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> {
             CallbackInfo ci
     ) {
         if (!ClientSurgeryState.isLying(entity.getUUID())) {
+            return;
+        }
+
+        if (ClientDownedState.isActive()) {
             return;
         }
 

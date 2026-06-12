@@ -108,5 +108,44 @@
 
   "screen.vitalis.required_supplies": "Szükséges alapanyagok",
 
-  "message.vitalis.surgery_finished": "A műtét sikeresen befejeződött."
+  "message.vitalis.surgery_finished": "A műtét sikeresen befejeződött.",
+
+  "message.vitalis.no_treatment_needed": "Ehhez jelenleg nincs szükség kezelésre.",
+  "message.vitalis.treatment_finished": "A kezelés befejeződött.",
+  "message.vitalis.treatment_already_running": "Már folyamatban van egy kezelés.",
+  "message.vitalis.blood_transfusion_started": "Vérátömlesztés megkezdve.",
+  "message.vitalis.blood_transfusion_finished": "Vérátömlesztés befejezve.",
+  "screen.vitalis.surgery.in_progress": "Műtét folyamatban...",
+
+  "message.vitalis.not_enough_supplies": "Nincs elegendő orvosi felszerelés.",
+  "screen.vitalis.downed": "Eszméletlen vagy",
+  "screen.vitalis.give_up": "Feladás",
+  "screen.vitalis.revive_time": "Újraélesztési idő",
+  "item.vitalis.defibrillator": "Defibrillátor",
+  "item.vitalis.defibrillator.tooltip": "Eszméletlen játékos újraélesztésére használható.",
+
+  "hud.vitalis.heart_rate": "Pulzus",
+  "hud.vitalis.blood_pressure": "Vérnyomás",
+
+  "item.vitalis.energy_drink": "Energiaital",
+  "item.vitalis.energy_drink.tooltip": "Ideiglenesen felpörgeti a szervezetet, növeli a pulzust és a vérnyomást.",
+
+  "item.vitalis.adrenaline": "Adrenalin injekció",
+  "item.vitalis.adrenaline.tooltip": "Súlyos állapotban ideiglenesen stabilizálja a beteget.",
+
+  "item.vitalis.defibrillator": "Defibrillátor",
+  "item.vitalis.defibrillator.tooltip": "Eszméletlen vagy kritikus állapotú játékos újraélesztésére használható.",
+
+  "item.vitalis.cpr_kit": "CPR készlet",
+  "item.vitalis.cpr_kit.tooltip": "Alap újraélesztési felszerelés vészhelyzetekhez.",
+
+  "item.vitalis.oxygen_mask": "Oxigénmaszk",
+  "item.vitalis.oxygen_mask.tooltip": "Légzési problémák és eszméletlenség kezelésére használható.",
+
+  "screen.vitalis.downed": "Eszméletlen vagy",
+  "screen.vitalis.give_up": "Feladás",
+  "screen.vitalis.revive_time": "Újraélesztési idő",
+  "message.vitalis.player_revived": "A játékos újraélesztve.",
+  "item.vitalis.defibrillator": "Defibrillátor",
+  "item.vitalis.defibrillator.tooltip": "Eszméletlen játékos újraélesztésére használható."
 }

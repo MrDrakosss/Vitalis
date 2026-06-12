@@ -1,8 +1,9 @@
 package me.xavi.vitalis.client.screen;
 
 import me.xavi.vitalis.Vitalis;
-import me.xavi.vitalis.client.ClientMedicalState;
-import me.xavi.vitalis.client.ClientSurgeryState;
+import me.xavi.vitalis.client.state.ClientMedicalState;
+import me.xavi.vitalis.client.state.ClientSurgeryState;
+import me.xavi.vitalis.client.state.ClientSurgeryTreatmentState;
 import me.xavi.vitalis.medical.BloodLevel;
 import me.xavi.vitalis.medical.BodyPart;
 import me.xavi.vitalis.medical.InjuryStatus;
@@ -43,8 +44,8 @@ public class SurgeryScreen extends Screen {
     private static final int SLOT_STEP_X = 18;
     private static final int SLOT_STEP_Y = 18;
 
-    private static final int INV_SLOT_START_X = 5;
-    private static final int INV_SLOT_START_Y = 7;
+    private static final int INV_SLOT_START_X = 8;
+    private static final int INV_SLOT_START_Y = 8;
 
     private static final int START_INV_WIDTH = 150;
     private static final int START_INV_HEIGHT = 66;
@@ -106,7 +107,13 @@ public class SurgeryScreen extends Screen {
 
         surgeryButton = addRenderableWidget(Button.builder(
                 Component.translatable("screen.vitalis.surgery.start"),
-                button -> ClientPlayNetworking.send(new SurgeryActionPayload(selectedPart))
+                button -> {
+                    if (shouldTreatBlood()) {
+                        ClientPlayNetworking.send(SurgeryActionPayload.blood());
+                    } else {
+                        ClientPlayNetworking.send(SurgeryActionPayload.bodyPart(selectedPart));
+                    }
+                }
         ).bounds(
                 startPanelX + START_BUTTON_X,
                 startPanelY + START_BUTTON_Y,
@@ -136,10 +143,26 @@ public class SurgeryScreen extends Screen {
         renderMedicalInventory(graphics);
         renderSurgeryStartInventory(graphics);
 
+        renderTreatmentProgress(graphics);
+
         super.render(graphics, mouseX, mouseY, partialTick);
 
         renderMedicalInventoryTooltip(graphics, mouseX, mouseY);
         renderRequirementTooltip(graphics, mouseX, mouseY);
+    }
+
+    private boolean shouldTreatBlood() {
+        boolean allPartsHealthy = true;
+
+        for (BodyPart part : BodyPart.VALUES) {
+            if (ClientMedicalState.getHp(part) < part.getMaxHp()
+                    || ClientMedicalState.getStatus(part) != InjuryStatus.NONE) {
+                allPartsHealthy = false;
+                break;
+            }
+        }
+
+        return allPartsHealthy && ClientMedicalState.getBloodMl() < BloodLevel.MAX_BLOOD_ML;
     }
 
     private void renderBodyPanel(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -212,6 +235,42 @@ public class SurgeryScreen extends Screen {
                 Component.translatable("hud.vitalis.blood"),
                 Component.literal(String.format("%.0f / %.0f ml", ClientMedicalState.getBloodMl(), BloodLevel.MAX_BLOOD_ML)),
                 colorForBlood(bloodLevel)
+        );
+    }
+
+    private void renderTreatmentProgress(GuiGraphics graphics) {
+        if (!ClientSurgeryTreatmentState.isActive()) {
+            return;
+        }
+
+        int x = (this.width - START_INV_WIDTH) / 2;
+        int y = this.height - 135;
+
+        int w = START_INV_WIDTH;
+        int h = 8;
+
+        float progress = ClientSurgeryTreatmentState.getProgress();
+        int filled = (int) (w * progress);
+
+        graphics.fill(x, y, x + w, y + h, 0xAA111111);
+        graphics.fill(x, y, x + filled, y + h, 0xFFAA2222);
+
+        graphics.drawString(
+                this.font,
+                Component.translatable("screen.vitalis.surgery.in_progress"),
+                x,
+                y - 12,
+                0xFFFFFFFF,
+                false
+        );
+
+        graphics.drawString(
+                this.font,
+                ClientSurgeryTreatmentState.getRemainingSeconds() + "s",
+                x + w - 24,
+                y - 12,
+                0xFFFFFFFF,
+                false
         );
     }
 
@@ -349,7 +408,7 @@ public class SurgeryScreen extends Screen {
     }
 
     private void renderMedicalInventory(GuiGraphics graphics) {
-        int invX = this.width - INV_WIDTH - 2;
+        int invX = this.width - INV_WIDTH;
         int invY = Math.max(8, (this.height - INV_HEIGHT) / 2);
 
         graphics.blit(INVENTORY_TEXTURE, invX, invY, 0, 0, INV_WIDTH, INV_HEIGHT, INV_WIDTH, INV_HEIGHT);

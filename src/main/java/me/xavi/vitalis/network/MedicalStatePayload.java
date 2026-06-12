@@ -6,13 +6,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public record MedicalStatePayload(
         int[] bodyPartHp,
         int[] bodyPartStatus,
-        double bloodMl
+        double bloodMl,
+        int heartRate,
+        int bloodPressureSystolic,
+        int bloodPressureDiastolic
 ) implements CustomPacketPayload {
 
     public static final Type<MedicalStatePayload> ID =
@@ -28,31 +28,42 @@ public record MedicalStatePayload(
         writeIntArray(buffer, payload.bodyPartHp);
         writeIntArray(buffer, payload.bodyPartStatus);
         buffer.writeDouble(payload.bloodMl);
+        buffer.writeVarInt(payload.heartRate);
+        buffer.writeVarInt(payload.bloodPressureSystolic);
+        buffer.writeVarInt(payload.bloodPressureDiastolic);
     }
 
     private static MedicalStatePayload read(FriendlyByteBuf buffer) {
         int[] hp = readIntArray(buffer);
         int[] status = readIntArray(buffer);
         double blood = buffer.readDouble();
+        int heartRate = buffer.readVarInt();
+        int systolic = buffer.readVarInt();
+        int diastolic = buffer.readVarInt();
 
-        return new MedicalStatePayload(hp, status, blood);
+        return new MedicalStatePayload(
+                hp,
+                status,
+                blood,
+                heartRate,
+                systolic,
+                diastolic
+        );
     }
 
     private static void writeIntArray(FriendlyByteBuf buffer, int[] values) {
         int expectedLength = BodyPart.VALUES.length;
-
         buffer.writeVarInt(expectedLength);
 
         for (int i = 0; i < expectedLength; i++) {
-            int value = i < values.length ? values[i] : 0;
-            buffer.writeVarInt(value);
+            buffer.writeVarInt(i < values.length ? values[i] : 0);
         }
     }
 
     private static int[] readIntArray(FriendlyByteBuf buffer) {
         int length = buffer.readVarInt();
-
         int safeLength = Math.max(0, Math.min(length, BodyPart.VALUES.length));
+
         int[] values = new int[safeLength];
 
         for (int i = 0; i < length; i++) {
@@ -64,26 +75,6 @@ public record MedicalStatePayload(
         }
 
         return values;
-    }
-
-    private static List<Integer> toList(int[] array) {
-        List<Integer> list = new ArrayList<>(array.length);
-
-        for (int value : array) {
-            list.add(value);
-        }
-
-        return list;
-    }
-
-    private static int[] toArray(List<Integer> list) {
-        int[] array = new int[list.size()];
-
-        for (int i = 0; i < array.length; i++) {
-            array[i] = list.get(i);
-        }
-
-        return array;
     }
 
     @Override

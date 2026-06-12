@@ -2,14 +2,19 @@ package me.xavi.vitalis;
 
 import me.xavi.vitalis.block.SurgeryTableBlock;
 import me.xavi.vitalis.command.VitalisCommands;
+import me.xavi.vitalis.medical.DownedManager;
 import me.xavi.vitalis.medical.InjuryStatus;
 import me.xavi.vitalis.medical.MedicalSystem;
+import me.xavi.vitalis.medical.SurgeryTreatmentManager;
 import me.xavi.vitalis.network.MedicalStatePayload;
 import me.xavi.vitalis.registry.*;
+import me.xavi.vitalis.util.DownedData;
 import me.xavi.vitalis.util.SurgeryData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -38,6 +43,7 @@ public class Vitalis implements ModInitializer {
 
         SurgeryData.ensureRegistered();
 
+        ServerTickEvents.END_SERVER_TICK.register(SurgeryTreatmentManager::tick);
 
         ServerTickEvents.END_WORLD_TICK.register(level -> {
             for (Player player : level.players()) {
@@ -50,7 +56,10 @@ public class Vitalis implements ModInitializer {
                             new MedicalStatePayload(
                                     SurgeryData.getAllBodyPartHp(player),
                                     statusOrdinals(SurgeryData.getAllBodyPartStatuses(player)),
-                                    SurgeryData.getBloodMl(player)
+                                    SurgeryData.getBloodMl(player),
+                                    SurgeryData.getHeartRate(player),
+                                    SurgeryData.getBloodPressureSystolic(player),
+                                    SurgeryData.getBloodPressureDiastolic(player)
                             )
                     );
                 }
@@ -122,6 +131,31 @@ public class Vitalis implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 VitalisCommands.register(dispatcher)
         );
+
+        // Ha a játékos el hagyja a játékot úgy, hogy a műtő asztalon fekszik akkor kiszedjük belőle, hogy belépésnél ne legyen probléma vele
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            ServerPlayer player = handler.player;
+
+            if (SurgeryData.isOnTable(player)) {
+                SurgeryTableBlock.getUp(player);
+            }
+        });
+
+        // Egyedi halál
+        ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, damageAmount) -> {
+            if (!(entity instanceof ServerPlayer player)) {
+                return true;
+            }
+
+            if (DownedData.isForceDeath(player)) {
+                return true;
+            }
+
+            DownedManager.startDowned(player);
+            return false;
+        });
+
+        ServerTickEvents.END_SERVER_TICK.register(DownedManager::tick);
 
         LOGGER.info("Vitalis initialized!");
     }

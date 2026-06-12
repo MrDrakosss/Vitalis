@@ -81,6 +81,27 @@ public class SurgeryData {
                     .persistent(Codec.DOUBLE)
     );
 
+    public static final AttachmentType<Integer> HEART_RATE = AttachmentRegistry.create(
+            Vitalis.id("heart_rate"),
+            builder -> builder
+                    .initializer(() -> 75)
+                    .persistent(Codec.INT)
+    );
+
+    public static final AttachmentType<Integer> BLOOD_PRESSURE_SYSTOLIC = AttachmentRegistry.create(
+            Vitalis.id("blood_pressure_systolic"),
+            builder -> builder
+                    .initializer(() -> 120)
+                    .persistent(Codec.INT)
+    );
+
+    public static final AttachmentType<Integer> BLOOD_PRESSURE_DIASTOLIC = AttachmentRegistry.create(
+            Vitalis.id("blood_pressure_diastolic"),
+            builder -> builder
+                    .initializer(() -> 80)
+                    .persistent(Codec.INT)
+    );
+
     private static List<Float> defaultInjuries() {
         List<Float> list = new ArrayList<>(BODY_PARTS.length);
 
@@ -310,5 +331,35 @@ public class SurgeryData {
 
     public static void resetBlood(Player player) {
         setBloodMl(player, BloodLevel.MAX_BLOOD_ML);
+    }
+
+    public static int getHeartRate(Player player) {
+        return player.getAttachedOrElse(HEART_RATE, 75);
+    }
+
+    public static void setHeartRate(Player player, int value) {
+        player.setAttached(HEART_RATE, Math.max(0, value));
+    }
+
+    public static int getBloodPressureSystolic(Player player) {
+        return player.getAttachedOrElse(BLOOD_PRESSURE_SYSTOLIC, 120);
+    }
+
+    public static void setBloodPressureSystolic(Player player, int value) {
+        player.setAttached(BLOOD_PRESSURE_SYSTOLIC, Math.max(0, value));
+    }
+
+    public static int getBloodPressureDiastolic(Player player) {
+        return player.getAttachedOrElse(BLOOD_PRESSURE_DIASTOLIC, 80);
+    }
+
+    public static void setBloodPressureDiastolic(Player player, int value) {
+        player.setAttached(BLOOD_PRESSURE_DIASTOLIC, Math.max(0, value));
+    }
+
+    public static void resetVitals(Player player) {
+        setHeartRate(player, 75);
+        setBloodPressureSystolic(player, 120);
+        setBloodPressureDiastolic(player, 80);
     }
 }

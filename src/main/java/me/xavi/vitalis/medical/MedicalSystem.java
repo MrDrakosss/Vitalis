@@ -30,6 +30,8 @@ public final class MedicalSystem {
         applyBleeding(player);
         applyMovementSlow(player);
         applyBrokenLegJumpLimit(player);
+        applyNaturalBloodRegen(player);
+        updateVitals(player);
     }
 
     private static final double BROKEN_LEG_MAX_JUMP_VELOCITY = 0.16D;
@@ -195,5 +197,87 @@ public final class MedicalSystem {
         }
 
         return 0.0D;
+    }
+
+    private static void updateVitals(Player player) {
+        double blood = SurgeryData.getBloodMl(player);
+        double bloodRatio = blood / BloodLevel.MAX_BLOOD_ML;
+        bloodRatio = Math.max(0.0D, Math.min(1.0D, bloodRatio));
+
+        int injuryPenalty = 0;
+
+        for (BodyPart part : BodyPart.VALUES) {
+            int hp = SurgeryData.getBodyPartHp(player, part);
+            InjuryStatus status = SurgeryData.getBodyPartStatus(player, part);
+
+            double partRatio = (double) hp / (double) part.getMaxHp();
+
+            if (partRatio <= 0.35D) {
+                injuryPenalty += 12;
+            } else if (partRatio <= 0.70D) {
+                injuryPenalty += 6;
+            }
+
+            if (status == InjuryStatus.OPEN_FRACTURE || status == InjuryStatus.BULLET_WOUND) {
+                injuryPenalty += 12;
+            } else if (status != InjuryStatus.NONE) {
+                injuryPenalty += 5;
+            }
+        }
+
+        int heartRate;
+        int systolic;
+        int diastolic;
+
+        if (bloodRatio >= 0.85D) {
+            heartRate = 75 + injuryPenalty;
+            systolic = 120;
+            diastolic = 80;
+        } else if (bloodRatio >= 0.65D) {
+            heartRate = 95 + injuryPenalty;
+            systolic = 105;
+            diastolic = 70;
+        } else if (bloodRatio >= 0.45D) {
+            heartRate = 120 + injuryPenalty;
+            systolic = 90;
+            diastolic = 60;
+        } else if (bloodRatio >= 0.25D) {
+            heartRate = 145 + injuryPenalty;
+            systolic = 75;
+            diastolic = 45;
+        } else {
+            heartRate = 40;
+            systolic = 55;
+            diastolic = 30;
+        }
+
+        heartRate = Math.min(190, heartRate);
+
+        SurgeryData.setHeartRate(player, heartRate);
+        SurgeryData.setBloodPressureSystolic(player, systolic);
+        SurgeryData.setBloodPressureDiastolic(player, diastolic);
+    }
+
+    private static void applyNaturalBloodRegen(Player player) {
+        double blood = SurgeryData.getBloodMl(player);
+
+        if (blood >= BloodLevel.MAX_BLOOD_ML) {
+            return;
+        }
+
+        boolean bleeding = false;
+
+        for (BodyPart part : BodyPart.VALUES) {
+            if (SurgeryData.getBodyPartStatus(player, part).getBleedRateMlPerSecond() > 0.0D) {
+                bleeding = true;
+                break;
+            }
+        }
+
+        if (bleeding) {
+            return;
+        }
+
+        SurgeryData.addBloodMl(player, 0.35D / 20.0D);
     }
 }

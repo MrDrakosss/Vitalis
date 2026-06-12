@@ -1,7 +1,7 @@
 package me.xavi.vitalis.mixin;
 
-import me.xavi.vitalis.client.ClientMedicalState;
-import me.xavi.vitalis.client.ClientSurgeryState;
+import me.xavi.vitalis.client.state.ClientMedicalState;
+import me.xavi.vitalis.client.state.ClientSurgeryState;
 import me.xavi.vitalis.medical.BodyPart;
 import me.xavi.vitalis.medical.InjuryStatus;
 import net.minecraft.client.player.Input;

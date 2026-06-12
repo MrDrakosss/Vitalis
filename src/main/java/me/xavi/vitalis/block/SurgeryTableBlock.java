@@ -37,7 +37,7 @@ public class SurgeryTableBlock extends Block implements EntityBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<BedPart> PART = EnumProperty.create("part", BedPart.class);
 
-    public static final double TABLE_SURFACE_HEIGHT = 1.0D;
+    public static final double TABLE_SURFACE_HEIGHT = 0.9D;
 
     private static final VoxelShape SHAPE =
             Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
@@ -297,9 +297,9 @@ public class SurgeryTableBlock extends Block implements EntityBlock {
 
         Direction facing = headState.getValue(FACING);
 
-        double x = headPos.getX() + 0.5D + (facing.getStepX() * 1.25D);
+        double x = headPos.getX() + 0.5D + (facing.getStepX() * 1.45D);
         double y = headPos.getY() + TABLE_SURFACE_HEIGHT;
-        double z = headPos.getZ() + 0.5D + facing.getStepZ() * 1.25D;
+        double z = headPos.getZ() + 0.5D + facing.getStepZ() * 1.45D;
 
         float yaw = switch (facing) {
             case SOUTH -> 0.0F;

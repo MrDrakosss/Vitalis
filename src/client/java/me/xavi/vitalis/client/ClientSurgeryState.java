@@ -1,6 +1,7 @@
 package me.xavi.vitalis.client;
 
 import me.xavi.vitalis.block.SurgeryTableBlock;
+import me.xavi.vitalis.medical.BodyPart;
 import me.xavi.vitalis.registry.ModBlocks;
 import me.xavi.vitalis.util.SurgeryData;
 import net.minecraft.client.Minecraft;
@@ -112,5 +113,15 @@ public class ClientSurgeryState {
         }
 
         return 0.0F;
+    }
+
+    private static BodyPart selectedBodyPart = BodyPart.HEAD;
+
+    public static BodyPart getSelectedBodyPart() {
+        return selectedBodyPart;
+    }
+
+    public static void setSelectedBodyPart(BodyPart part) {
+        selectedBodyPart = part;
     }
 }

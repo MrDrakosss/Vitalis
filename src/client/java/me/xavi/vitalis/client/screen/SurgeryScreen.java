@@ -2,6 +2,7 @@ package me.xavi.vitalis.client.screen;
 
 import me.xavi.vitalis.Vitalis;
 import me.xavi.vitalis.client.ClientMedicalState;
+import me.xavi.vitalis.client.ClientSurgeryState;
 import me.xavi.vitalis.medical.BloodLevel;
 import me.xavi.vitalis.medical.BodyPart;
 import me.xavi.vitalis.medical.InjuryStatus;
@@ -13,7 +14,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -27,7 +29,9 @@ public class SurgeryScreen extends Screen {
     private static final ResourceLocation INVENTORY_TEXTURE =
             Vitalis.id("textures/gui/surgery_inventory.png");
 
-    // Surgary Inventory
+    private static final ResourceLocation SURGERY_START_TEXTURE =
+            Vitalis.id("textures/gui/surgery_start_inventory.png");
+
     private static final int INV_WIDTH = 47;
     private static final int INV_HEIGHT = 212;
 
@@ -39,14 +43,8 @@ public class SurgeryScreen extends Screen {
     private static final int SLOT_STEP_X = 18;
     private static final int SLOT_STEP_Y = 18;
 
-    // Ezeket állítsd finoman a PNG alapján, ha 1-2 pixellel még csúszik.
-    private static final int INV_SLOT_START_X = 8;
-    private static final int INV_SLOT_START_Y = 8;
-
-
-    // Start Inventory
-    private static final ResourceLocation SURGERY_START_TEXTURE =
-            Vitalis.id("textures/gui/surgery_start_inventory.png");
+    private static final int INV_SLOT_START_X = 5;
+    private static final int INV_SLOT_START_Y = 7;
 
     private static final int START_INV_WIDTH = 150;
     private static final int START_INV_HEIGHT = 66;
@@ -61,7 +59,11 @@ public class SurgeryScreen extends Screen {
     private static final int START_BUTTON_WIDTH = 136;
     private static final int START_BUTTON_HEIGHT = 20;
 
+    private static final int BODY_SCALE = 4;
+    private static final int BODY_OUTLINE = 1;
+
     private final List<ItemStack> medicalInventory = new ArrayList<>();
+    private final List<BodyRegion> bodyRegions = new ArrayList<>();
 
     private BodyPart selectedPart = BodyPart.HEAD;
     private Button surgeryButton;
@@ -94,29 +96,6 @@ public class SurgeryScreen extends Screen {
 
     @Override
     protected void init() {
-        int leftX = 16;
-        int topY = 24;
-
-        int buttonW = 112;
-        int buttonH = 20;
-        int gap = 5;
-
-        int index = 0;
-
-        for (BodyPart part : BodyPart.VALUES) {
-            addRenderableWidget(Button.builder(
-                    Component.translatable(partTranslationKey(part)),
-                    button -> selectedPart = part
-            ).bounds(
-                    leftX + 12,
-                    topY + 38 + (buttonH + gap) * index,
-                    buttonW,
-                    buttonH
-            ).build());
-
-            index++;
-        }
-
         addRenderableWidget(Button.builder(
                 Component.translatable("screen.vitalis.close"),
                 button -> closeAndLeave()
@@ -153,10 +132,9 @@ public class SurgeryScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderLeftPanel(graphics);
-        renderSurgeryStartInventory(graphics);
+        renderBodyPanel(graphics, mouseX, mouseY);
         renderMedicalInventory(graphics);
-        renderPatientPreview(graphics);
+        renderSurgeryStartInventory(graphics);
 
         super.render(graphics, mouseX, mouseY, partialTick);
 
@@ -164,15 +142,14 @@ public class SurgeryScreen extends Screen {
         renderRequirementTooltip(graphics, mouseX, mouseY);
     }
 
-    private void renderLeftPanel(GuiGraphics graphics) {
+    private void renderBodyPanel(GuiGraphics graphics, int mouseX, int mouseY) {
         int x = 16;
         int y = 24;
-        int w = 150;
+        int w = 166;
         int h = this.height - 76;
 
         graphics.fill(x, y, x + w, y + h, 0xC20A1018);
         graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, 0x99202A36);
-
         graphics.fill(x, y, x + w, y + 26, 0xE08B1E1E);
         graphics.fill(x + 2, y + 2, x + w - 2, y + 25, 0x804A0E0E);
 
@@ -185,12 +162,15 @@ public class SurgeryScreen extends Screen {
                 false
         );
 
-        int infoY = y + 225;
+        renderClickableBody(graphics, x + 58, y + 38);
+
+        int infoY = y + 188;
 
         int hp = ClientMedicalState.getHp(selectedPart);
         int maxHp = selectedPart.getMaxHp();
         InjuryStatus status = ClientMedicalState.getStatus(selectedPart);
-        BloodLevel bloodLevel = ClientMedicalState.getBloodLevel();
+
+        double percent = maxHp <= 0 ? 0.0D : ((double) hp / (double) maxHp) * 100.0D;
 
         drawInfoBox(
                 graphics,
@@ -199,7 +179,7 @@ public class SurgeryScreen extends Screen {
                 w - 20,
                 Component.translatable("screen.vitalis.selected"),
                 Component.translatable(partTranslationKey(selectedPart)),
-                0xFFFFFFFF
+                bodyPartColor(selectedPart)
         );
 
         drawInfoBox(
@@ -207,9 +187,9 @@ public class SurgeryScreen extends Screen {
                 x + 10,
                 infoY + 38,
                 w - 20,
-                Component.literal("HP"),
-                Component.literal(hp + " / " + maxHp),
-                colorForHp(hp, maxHp)
+                Component.translatable("screen.vitalis.injury"),
+                Component.literal(String.format("%d / %d HP (%.0f%%)", hp, maxHp, percent)),
+                bodyPartColor(selectedPart)
         );
 
         drawInfoBox(
@@ -219,8 +199,10 @@ public class SurgeryScreen extends Screen {
                 w - 20,
                 Component.translatable("screen.vitalis.status"),
                 Component.translatable(statusTranslationKey(status)),
-                colorForStatus(status, hp, maxHp)
+                bodyPartColor(selectedPart)
         );
+
+        BloodLevel bloodLevel = ClientMedicalState.getBloodLevel();
 
         drawInfoBox(
                 graphics,
@@ -233,6 +215,162 @@ public class SurgeryScreen extends Screen {
         );
     }
 
+    private void renderClickableBody(GuiGraphics graphics, int startX, int startY) {
+        Minecraft client = Minecraft.getInstance();
+
+        if (!(client.player instanceof AbstractClientPlayer player)) {
+            return;
+        }
+
+        bodyRegions.clear();
+
+        PlayerSkin skin = player.getSkin();
+        ResourceLocation texture = skin.texture();
+        boolean slim = skin.model().id().equals("slim");
+
+        int headW = 8 * BODY_SCALE;
+        int headH = 8 * BODY_SCALE;
+
+        int bodyW = 8 * BODY_SCALE;
+        int bodyH = 12 * BODY_SCALE;
+
+        int armW = (slim ? 3 : 4) * BODY_SCALE;
+        int armH = 12 * BODY_SCALE;
+
+        int legW = 4 * BODY_SCALE;
+        int legH = 12 * BODY_SCALE;
+
+        int totalW = armW + BODY_OUTLINE + bodyW + BODY_OUTLINE + armW;
+        int centerX = startX + totalW / 2;
+
+        int headX = centerX - headW / 2;
+        int headY = startY;
+
+        int bodyX = centerX - bodyW / 2;
+        int bodyY = headY + headH + BODY_OUTLINE;
+
+        int leftArmX = bodyX - armW - BODY_OUTLINE;
+        int rightArmX = bodyX + bodyW + BODY_OUTLINE;
+
+        int legY = bodyY + bodyH + BODY_OUTLINE;
+        int leftLegX = centerX - legW;
+        int rightLegX = centerX + BODY_OUTLINE;
+
+        drawBodyPart(graphics, texture, headX, headY, 8, 8, 8, 8, BodyPart.HEAD);
+        drawSkinPart(graphics, texture, headX, headY, 40, 8, 8, 8);
+
+        drawBodyPart(graphics, texture, bodyX, bodyY, 20, 20, 8, 12, BodyPart.CHEST);
+        drawSkinPart(graphics, texture, bodyX, bodyY, 20, 36, 8, 12);
+
+        if (slim) {
+            drawBodyPart(graphics, texture, leftArmX, bodyY, 44, 20, 3, 12, BodyPart.LEFT_ARM);
+            drawSkinPart(graphics, texture, leftArmX, bodyY, 44, 36, 3, 12);
+
+            drawBodyPart(graphics, texture, rightArmX, bodyY, 36, 52, 3, 12, BodyPart.RIGHT_ARM);
+            drawSkinPart(graphics, texture, rightArmX, bodyY, 52, 52, 3, 12);
+        } else {
+            drawBodyPart(graphics, texture, leftArmX, bodyY, 44, 20, 4, 12, BodyPart.LEFT_ARM);
+            drawSkinPart(graphics, texture, leftArmX, bodyY, 44, 36, 4, 12);
+
+            drawBodyPart(graphics, texture, rightArmX, bodyY, 36, 52, 4, 12, BodyPart.RIGHT_ARM);
+            drawSkinPart(graphics, texture, rightArmX, bodyY, 52, 52, 4, 12);
+        }
+
+        drawBodyPart(graphics, texture, leftLegX, legY, 4, 20, 4, 12, BodyPart.LEFT_LEG);
+        drawSkinPart(graphics, texture, leftLegX, legY, 4, 36, 4, 12);
+
+        drawBodyPart(graphics, texture, rightLegX, legY, 20, 52, 4, 12, BodyPart.RIGHT_LEG);
+        drawSkinPart(graphics, texture, rightLegX, legY, 4, 52, 4, 12);
+    }
+
+    private void drawBodyPart(
+            GuiGraphics graphics,
+            ResourceLocation texture,
+            int x,
+            int y,
+            int u,
+            int v,
+            int width,
+            int height,
+            BodyPart part
+    ) {
+        int renderedWidth = width * BODY_SCALE;
+        int renderedHeight = height * BODY_SCALE;
+
+        bodyRegions.add(new BodyRegion(part, x, y, renderedWidth, renderedHeight));
+
+        drawOutline(graphics, x, y, renderedWidth, renderedHeight, bodyPartColor(part));
+        drawSkinPart(graphics, texture, x, y, u, v, width, height);
+
+        if (part == selectedPart) {
+            drawSelectionOutline(graphics, x, y, renderedWidth, renderedHeight);
+        }
+    }
+
+    private void drawSkinPart(
+            GuiGraphics graphics,
+            ResourceLocation texture,
+            int x,
+            int y,
+            int u,
+            int v,
+            int width,
+            int height
+    ) {
+        graphics.blit(
+                texture,
+                x,
+                y,
+                width * BODY_SCALE,
+                height * BODY_SCALE,
+                u,
+                v,
+                width,
+                height,
+                64,
+                64
+        );
+    }
+
+    private void drawOutline(GuiGraphics graphics, int x, int y, int width, int height, int color) {
+        graphics.fill(x - BODY_OUTLINE, y - BODY_OUTLINE, x + width + BODY_OUTLINE, y, color);
+        graphics.fill(x - BODY_OUTLINE, y + height, x + width + BODY_OUTLINE, y + height + BODY_OUTLINE, color);
+        graphics.fill(x - BODY_OUTLINE, y, x, y + height, color);
+        graphics.fill(x + width, y, x + width + BODY_OUTLINE, y + height, color);
+    }
+
+    private void drawSelectionOutline(GuiGraphics graphics, int x, int y, int width, int height) {
+        int color = 0xFFFFFFFF;
+
+        graphics.fill(x - 2, y - 2, x + width + 2, y - 1, color);
+        graphics.fill(x - 2, y + height + 1, x + width + 2, y + height + 2, color);
+        graphics.fill(x - 2, y - 1, x - 1, y + height + 1, color);
+        graphics.fill(x + width + 1, y - 1, x + width + 2, y + height + 1, color);
+    }
+
+    private void renderMedicalInventory(GuiGraphics graphics) {
+        int invX = this.width - INV_WIDTH - 2;
+        int invY = Math.max(8, (this.height - INV_HEIGHT) / 2);
+
+        graphics.blit(INVENTORY_TEXTURE, invX, invY, 0, 0, INV_WIDTH, INV_HEIGHT, INV_WIDTH, INV_HEIGHT);
+
+        for (int i = 0; i < SLOT_COUNT; i++) {
+            if (i >= medicalInventory.size()) continue;
+
+            ItemStack stack = medicalInventory.get(i);
+            if (stack.isEmpty()) continue;
+
+            int col = i % INV_COLUMNS;
+            int row = i / INV_COLUMNS;
+
+            int slotX = invX + INV_SLOT_START_X + col * SLOT_STEP_X;
+            int slotY = invY + INV_SLOT_START_Y + row * SLOT_STEP_Y;
+
+            graphics.renderItem(stack, slotX, slotY);
+            graphics.renderItemDecorations(this.font, stack, slotX, slotY);
+        }
+    }
+
     private void renderSurgeryStartInventory(GuiGraphics graphics) {
         if (!ClientMedicalState.needsSurgery(selectedPart)) {
             return;
@@ -241,17 +379,7 @@ public class SurgeryScreen extends Screen {
         int x = (this.width - START_INV_WIDTH) / 2;
         int y = this.height - 115;
 
-        graphics.blit(
-                SURGERY_START_TEXTURE,
-                x,
-                y,
-                0,
-                0,
-                START_INV_WIDTH,
-                START_INV_HEIGHT,
-                START_INV_WIDTH,
-                START_INV_HEIGHT
-        );
+        graphics.blit(SURGERY_START_TEXTURE, x, y, 0, 0, START_INV_WIDTH, START_INV_HEIGHT, START_INV_WIDTH, START_INV_HEIGHT);
 
         graphics.drawString(
                 this.font,
@@ -265,9 +393,7 @@ public class SurgeryScreen extends Screen {
         List<Requirement> requirements = getRequirements(selectedPart);
 
         for (int i = 0; i < START_SLOT_COUNT; i++) {
-            if (i >= requirements.size()) {
-                continue;
-            }
+            if (i >= requirements.size()) continue;
 
             Requirement requirement = requirements.get(i);
             int available = countItem(requirement.item());
@@ -287,171 +413,19 @@ public class SurgeryScreen extends Screen {
         }
     }
 
-    private boolean hasAllRequirements(BodyPart part) {
-        for (Requirement requirement : getRequirements(part)) {
-            if (countItem(requirement.item()) < requirement.amount()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private void renderSurgeryRequirement(GuiGraphics graphics) {
-        if (!ClientMedicalState.needsSurgery(selectedPart)) {
-            return;
-        }
-
-        List<Requirement> requirements = getRequirements(selectedPart);
-
-        int panelW = 170;
-        int panelH = 22 + requirements.size() * 18;
-
-        int x = (this.width - panelW) / 2;
-        int y = this.height - 58 - panelH - 6;
-
-        graphics.fill(x, y, x + panelW, y + panelH, 0xC20A1018);
-        graphics.fill(x + 1, y + 1, x + panelW - 1, y + panelH - 1, 0x99202A36);
-        graphics.fill(x, y, x + panelW, y + 18, 0xCC7A1717);
-
-        graphics.drawString(
-                this.font,
-                Component.translatable("screen.vitalis.supplies"),
-                x + 8,
-                y + 6,
-                0xFFFFFFFF,
-                false
-        );
-
-        int lineY = y + 23;
-
-        for (Requirement requirement : requirements) {
-            int available = countItem(requirement.item());
-            boolean hasEnough = available >= requirement.amount();
-
-            ItemStack stack = new ItemStack(requirement.item(), requirement.amount());
-
-            graphics.renderItem(stack, x + 8, lineY - 4);
-            graphics.renderItemDecorations(this.font, stack, x + 8, lineY - 4);
-
-            int color = hasEnough ? 0xFF55FF55 : 0xFFFF5555;
-
-            graphics.drawString(
-                    this.font,
-                    Component.literal(available + " / " + requirement.amount()),
-                    x + 32,
-                    lineY,
-                    color,
-                    false
-            );
-
-            graphics.drawString(
-                    this.font,
-                    stack.getHoverName(),
-                    x + 72,
-                    lineY,
-                    color,
-                    false
-            );
-
-            lineY += 18;
-        }
-    }
-
-    private void renderPatientPreview(GuiGraphics graphics) {
-        Minecraft client = Minecraft.getInstance();
-
-        if (client.player == null) {
-            return;
-        }
-
-        int x = this.width - 95;
-        int y = 92;
-
-        graphics.fill(x - 35, y - 72, x + 35, y + 12, 0xAA0B1018);
-        graphics.fill(x - 34, y - 71, x + 34, y + 11, 0x55202A36);
-
-        graphics.drawString(
-                this.font,
-                Component.translatable("screen.vitalis.patient"),
-                x - 24,
-                y - 66,
-                0xFFFFFFFF,
-                false
-        );
-
-        InventoryScreen.renderEntityInInventoryFollowsMouse(
-                graphics,
-                x,
-                y,
-                32,
-                x,
-                y,
-                1f,
-                1f,
-                1f,
-                client.player
-        );
-    }
-
-    private void renderMedicalInventory(GuiGraphics graphics) {
-        int invX = this.width - INV_WIDTH - 2;
-        int invY = Math.max(8, (this.height - INV_HEIGHT) / 2);
-
-        graphics.blit(
-                INVENTORY_TEXTURE,
-                invX,
-                invY,
-                0,
-                0,
-                INV_WIDTH,
-                INV_HEIGHT,
-                INV_WIDTH,
-                INV_HEIGHT
-        );
-
-        for (int i = 0; i < SLOT_COUNT; i++) {
-            if (i >= medicalInventory.size()) {
-                continue;
-            }
-
-            ItemStack stack = medicalInventory.get(i);
-
-            if (stack.isEmpty()) {
-                continue;
-            }
-
-            int col = i % INV_COLUMNS;
-            int row = i / INV_COLUMNS;
-
-            int slotX = invX + INV_SLOT_START_X + col * SLOT_STEP_X;
-            int slotY = invY + INV_SLOT_START_Y + row * SLOT_STEP_Y;
-
-            graphics.renderItem(stack, slotX, slotY);
-            graphics.renderItemDecorations(this.font, stack, slotX, slotY);
-        }
-    }
-
     private void renderMedicalInventoryTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
         int hoveredSlot = getHoveredInventorySlot(mouseX, mouseY);
 
-        if (hoveredSlot < 0 || hoveredSlot >= medicalInventory.size()) {
-            return;
-        }
+        if (hoveredSlot < 0 || hoveredSlot >= medicalInventory.size()) return;
 
         ItemStack stack = medicalInventory.get(hoveredSlot);
-
-        if (stack.isEmpty()) {
-            return;
-        }
+        if (stack.isEmpty()) return;
 
         graphics.renderTooltip(this.font, stack, mouseX, mouseY);
     }
 
     private void renderRequirementTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
-        if (!ClientMedicalState.needsSurgery(selectedPart)) {
-            return;
-        }
+        if (!ClientMedicalState.needsSurgery(selectedPart)) return;
 
         int x = (this.width - START_INV_WIDTH) / 2;
         int y = this.height - 115;
@@ -464,12 +438,7 @@ public class SurgeryScreen extends Screen {
 
             if (mouseX >= slotX && mouseX < slotX + 16 && mouseY >= slotY && mouseY < slotY + 16) {
                 Requirement requirement = requirements.get(i);
-                graphics.renderTooltip(
-                        this.font,
-                        new ItemStack(requirement.item(), requirement.amount()),
-                        mouseX,
-                        mouseY
-                );
+                graphics.renderTooltip(this.font, new ItemStack(requirement.item(), requirement.amount()), mouseX, mouseY);
                 return;
             }
         }
@@ -486,10 +455,7 @@ public class SurgeryScreen extends Screen {
                 int slotX = invX + INV_SLOT_START_X + col * SLOT_STEP_X;
                 int slotY = invY + INV_SLOT_START_Y + row * SLOT_STEP_Y;
 
-                if (mouseX >= slotX
-                        && mouseX < slotX + SLOT_SIZE
-                        && mouseY >= slotY
-                        && mouseY < slotY + SLOT_SIZE) {
+                if (mouseX >= slotX && mouseX < slotX + SLOT_SIZE && mouseY >= slotY && mouseY < slotY + SLOT_SIZE) {
                     return index;
                 }
             }
@@ -498,9 +464,21 @@ public class SurgeryScreen extends Screen {
         return -1;
     }
 
+    private BodyPart getClickedBodyPart(double mouseX, double mouseY) {
+        for (BodyRegion region : bodyRegions) {
+            if (mouseX >= region.x()
+                    && mouseX < region.x() + region.width()
+                    && mouseY >= region.y()
+                    && mouseY < region.y() + region.height()) {
+                return region.part();
+            }
+        }
+
+        return null;
+    }
+
     private List<Requirement> getRequirements(BodyPart part) {
         InjuryStatus status = ClientMedicalState.getStatus(part);
-
         List<Requirement> requirements = new ArrayList<>();
 
         if (status == InjuryStatus.FRACTURE) {
@@ -550,6 +528,16 @@ public class SurgeryScreen extends Screen {
         return requirements;
     }
 
+    private boolean hasAllRequirements(BodyPart part) {
+        for (Requirement requirement : getRequirements(part)) {
+            if (countItem(requirement.item()) < requirement.amount()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private int countItem(Item item) {
         int amount = 0;
 
@@ -562,15 +550,7 @@ public class SurgeryScreen extends Screen {
         return amount;
     }
 
-    private void drawInfoBox(
-            GuiGraphics graphics,
-            int x,
-            int y,
-            int width,
-            Component label,
-            Component value,
-            int valueColor
-    ) {
+    private void drawInfoBox(GuiGraphics graphics, int x, int y, int width, Component label, Component value, int valueColor) {
         graphics.fill(x, y, x + width, y + 30, 0xAA05080D);
         graphics.fill(x + 1, y + 1, x + width - 1, y + 29, 0x55222C38);
 
@@ -578,30 +558,24 @@ public class SurgeryScreen extends Screen {
         graphics.drawString(this.font, value, x + 6, y + 17, valueColor, false);
     }
 
-    private int colorForHp(int hp, int maxHp) {
-        double ratio = (double) hp / (double) maxHp;
+    private int bodyPartColor(BodyPart part) {
+        int hp = ClientMedicalState.getHp(part);
+        int maxHp = part.getMaxHp();
+        InjuryStatus status = ClientMedicalState.getStatus(part);
 
-        if (ratio <= 0.35D) {
-            return 0xFFFF5555;
+        if (hp <= 0) return 0xFF777777;
+
+        double ratio = maxHp <= 0 ? 0.0D : (double) hp / (double) maxHp;
+
+        if (status == InjuryStatus.OPEN_FRACTURE || status == InjuryStatus.BULLET_WOUND || ratio <= 0.34D) {
+            return 0xFFFF3333;
         }
 
-        if (ratio <= 0.7D) {
-            return 0xFFFFFF55;
+        if (status != InjuryStatus.NONE || ratio <= 0.70D) {
+            return 0xFFFFFF44;
         }
 
         return 0xFF55FF55;
-    }
-
-    private int colorForStatus(InjuryStatus status, int hp, int maxHp) {
-        if (status == InjuryStatus.OPEN_FRACTURE || status == InjuryStatus.BULLET_WOUND) {
-            return 0xFFFF5555;
-        }
-
-        if (status != InjuryStatus.NONE) {
-            return 0xFFFFFF55;
-        }
-
-        return colorForHp(hp, maxHp);
     }
 
     private int colorForBlood(BloodLevel bloodLevel) {
@@ -641,6 +615,14 @@ public class SurgeryScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        BodyPart clickedPart = getClickedBodyPart(mouseX, mouseY);
+
+        if (clickedPart != null) {
+            selectedPart = clickedPart;
+            ClientSurgeryState.setSelectedBodyPart(clickedPart);
+            return true;
+        }
+
         int hoveredSlot = getHoveredInventorySlot((int) mouseX, (int) mouseY);
 
         if (hoveredSlot >= 0) {
@@ -693,5 +675,8 @@ public class SurgeryScreen extends Screen {
     }
 
     private record Requirement(Item item, int amount) {
+    }
+
+    private record BodyRegion(BodyPart part, int x, int y, int width, int height) {
     }
 }

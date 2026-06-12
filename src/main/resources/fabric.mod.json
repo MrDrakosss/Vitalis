@@ -9,11 +9,15 @@
   ],
   "contributors": [
     "Benikehun",
+    "",
+    "Hospital models by EliteCreatures",
+    "",
     "Special thanks for the Semmelweis University"
   ],
   "contact": {
     "homepage": "https://www.xavi.hu/",
-    "sources": "https://github.com/MrDrakosss/Vitalis"
+    "sources": "https://github.com/MrDrakosss/Vitalis",
+    "EliteCreatures model shop": "https://elitecreatures.com/"
   },
   "license": "MIT",
   "icon": "assets/vitalis/icon.png",

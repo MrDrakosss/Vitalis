@@ -28,19 +28,19 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
             float scale,
             CallbackInfo ci
     ) {
-        if (!ClientSurgeryState.isActive()) {
+        if (!ClientSurgeryState.isLying(entity.getUUID())) {
             return;
         }
 
         Minecraft client = Minecraft.getInstance();
 
-        if (client.player == null || entity.getId() != client.player.getId()) {
+        if (client.level == null) {
             return;
         }
 
         poseStack.mulPose(Axis.YP.rotationDegrees(-(180.0F - rotationYaw)));
 
-        float lockYaw = ClientSurgeryState.getLockYaw();
+        float lockYaw = ClientSurgeryState.getLockYaw(entity.getUUID());
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - lockYaw));
 
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));

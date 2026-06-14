@@ -2,6 +2,7 @@ package me.xavi.vitalis.registry;
 
 import me.xavi.vitalis.Vitalis;
 import me.xavi.vitalis.block.MedicalCabinetBlock;
+import me.xavi.vitalis.menus.ComputerMenu;
 import me.xavi.vitalis.menus.MedicalCabinetMenu;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,6 +29,16 @@ public class ModMenuTypes {
 
     public static final MenuType<MedicalCabinetMenu> LARGE_EQUIPMENT_CABINET =
             register("large_equipment_cabinet", MedicalCabinetBlock.CabinetType.EQUIPMENT, 4);
+
+    public static final MenuType<ComputerMenu> COMPUTER =
+            Registry.register(
+                    BuiltInRegistries.MENU,
+                    ResourceLocation.fromNamespaceAndPath(Vitalis.MOD_ID, "computer"),
+                    new MenuType<>(
+                            ComputerMenu::new,
+                            FeatureFlags.DEFAULT_FLAGS
+                    )
+            );
 
     private static MenuType<MedicalCabinetMenu> register(
             String name,

@@ -2,6 +2,7 @@ package me.xavi.vitalis.registry;
 
 import me.xavi.vitalis.Vitalis;
 import me.xavi.vitalis.item.AdrenalineItem;
+import me.xavi.vitalis.item.BloodBagItem;
 import me.xavi.vitalis.item.EnergyDrinkItem;
 import me.xavi.vitalis.item.MedicalItem;
 import net.minecraft.core.Registry;
@@ -121,9 +122,14 @@ public final class ModItems {
 
     public static final Item BLOOD_BAG = register(
             "blood_bag",
+            new BloodBagItem(new Item.Properties())
+    );
+
+    public static final Item BLOOD_BAG_EMPTY = register(
+            "blood_bag_empty",
             new MedicalItem(
-                    new Item.Properties().stacksTo(8),
-                    "item.vitalis.blood_bag.tooltip"
+                    new Item.Properties().stacksTo(16),
+                    "item.vitalis.blood_bag_empty.tooltip"
             )
     );
 

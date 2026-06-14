@@ -1,10 +1,12 @@
 package me.xavi.vitalis.client;
 
+import me.xavi.vitalis.block.OldComputerBlock;
 import me.xavi.vitalis.block.SurgeryTableBlock;
 import me.xavi.vitalis.client.input.OrbitCameraHandler;
 import me.xavi.vitalis.client.particle.BloodParticle;
 import me.xavi.vitalis.client.renderer.MedicalEffectsOverlay;
 import me.xavi.vitalis.client.renderer.MedicalStatusHud;
+import me.xavi.vitalis.client.screen.ComputerScreen;
 import me.xavi.vitalis.client.screen.DownedScreen;
 import me.xavi.vitalis.client.screen.MedicalCabinetScreen;
 import me.xavi.vitalis.client.screen.SurgeryScreen;
@@ -21,13 +23,16 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class VitalisClient implements ClientModInitializer {
 
@@ -145,6 +150,45 @@ public class VitalisClient implements ClientModInitializer {
         MenuScreens.register(ModMenuTypes.LARGE_SUPPLY_CABINET, MedicalCabinetScreen::new);
         MenuScreens.register(ModMenuTypes.LARGE_EQUIPMENT_CABINET, MedicalCabinetScreen::new);
 
-        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.STAND, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.STAND, RenderType.translucent());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.WET_FLOOR, RenderType.translucent());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.OLD_COMPUTER, RenderType.translucent());
+
+        HudRenderCallback.EVENT.register((graphics, tickDelta) -> {
+            Minecraft client = Minecraft.getInstance();
+
+            if (client.player == null || client.level == null || client.hitResult == null) {
+                return;
+            }
+
+            if (!(client.hitResult instanceof BlockHitResult hit)) {
+                return;
+            }
+
+            BlockState state = client.level.getBlockState(hit.getBlockPos());
+
+            if (state.getBlock() instanceof OldComputerBlock) {
+                Component text = null;
+
+                if (OldComputerBlock.isPowerButtonHitClient(state, hit)) {
+                    text = state.getValue(OldComputerBlock.POWERED)
+                            ? Component.translatable("screen.vitalis.turn_off")
+                            : Component.translatable("screen.vitalis.turn_on");
+                } else if (OldComputerBlock.isScreenHit(state, hit)) {
+                    text = Component.translatable("screen.vitalis.use");
+                }
+
+                if (text != null) {
+                    int x = client.getWindow().getGuiScaledWidth() / 2 + 10;
+                    int y = client.getWindow().getGuiScaledHeight() / 2 + 8;
+                    graphics.drawString(client.font, text, x, y, 0xFFFFFF, true);
+                }
+            }
+        });
+
+        MenuScreens.register(
+                ModMenuTypes.COMPUTER,
+                ComputerScreen::new
+        );
     }
 }

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "facing=north,powered=false": { "model": "vitalis:block/old_computer" },
+    "facing=east,powered=false": { "model": "vitalis:block/old_computer", "y": 90 },
+    "facing=south,powered=false": { "model": "vitalis:block/old_computer", "y": 180 },
+    "facing=west,powered=false": { "model": "vitalis:block/old_computer", "y": 270 },
+
+    "facing=north,powered=true": { "model": "vitalis:block/old_computer_on" },
+    "facing=east,powered=true": { "model": "vitalis:block/old_computer_on", "y": 90 },
+    "facing=south,powered=true": { "model": "vitalis:block/old_computer_on", "y": 180 },
+    "facing=west,powered=true": { "model": "vitalis:block/old_computer_on", "y": 270 }
+  }
+}

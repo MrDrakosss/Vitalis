@@ -1,9 +1,7 @@
 package me.xavi.vitalis.registry;
 
 import me.xavi.vitalis.Vitalis;
-import me.xavi.vitalis.block.StandBlock;
-import me.xavi.vitalis.block.MedicalCabinetBlock;
-import me.xavi.vitalis.block.SurgeryTableBlock;
+import me.xavi.vitalis.block.*;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
@@ -97,6 +95,24 @@ public final class ModBlocks {
             new StandBlock(
                     BlockBehaviour.Properties.of()
                             .strength(1.5F)
+                            .noOcclusion()
+            )
+    );
+
+    public static final Block OLD_COMPUTER = registerBlock(
+            "old_computer",
+            new OldComputerBlock(
+                    BlockBehaviour.Properties.of()
+                            .strength(1.5F)
+                            .noOcclusion()
+            )
+    );
+
+    public static final Block WET_FLOOR = registerBlock(
+            "wet_floor",
+            new WetFloorBlock(
+                    BlockBehaviour.Properties.of()
+                            .strength(0.5F)
                             .noOcclusion()
             )
     );

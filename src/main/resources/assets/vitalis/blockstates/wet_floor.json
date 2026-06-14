@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "vitalis:block/wet_floor" },
+    "facing=east": { "model": "vitalis:block/wet_floor", "y": 90 },
+    "facing=south": { "model": "vitalis:block/wet_floor", "y": 180 },
+    "facing=west": { "model": "vitalis:block/wet_floor", "y": 270 }
+  }
+}

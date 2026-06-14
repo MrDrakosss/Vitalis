@@ -178,5 +178,25 @@
 
   "screen.vitalis.allowed_items": "Engedélyezett tárgyak",
 
-  "block.vitalis.stand": "Infúziós állvány"
+  "block.vitalis.stand": "Infúziós állvány",
+
+  "message.vitalis.blood_bag_empty": "A vértasak üres.",
+  "message.vitalis.blood_full": "A véred már teljesen feltöltve.",
+  "message.vitalis.blood_restored": "%s ml vér visszatöltve.",
+  "item.vitalis.blood_bag.remaining": "Vér: %s / %s ml",
+
+  "item.vitalis.blood_bag": "Vértasak",
+  "item.vitalis.blood_bag_empty": "Üres vértasak",
+
+  "item.vitalis.blood_bag_empty.tooltip": "Üres vértasak. Vérátömlesztő állomáson feltölthető.",
+
+  "block.vitalis.old_computer": "Régi számítógép",
+
+  "screen.vitalis.turn_on": "Bekapcsolás",
+  "screen.vitalis.turn_off": "Kikapcsolás",
+
+  "screen.vitalis.computer": "Kórházi számítógép",
+
+  "screen.vitalis.use": "Használat",
+  "block.vitalis.wet_floor": "Vizes padló tábla"
 }

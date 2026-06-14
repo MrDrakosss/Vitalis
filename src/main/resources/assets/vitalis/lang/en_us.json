@@ -177,5 +177,24 @@
 
   "screen.vitalis.allowed_items": "Allowed items",
 
-  "block.vitalis.stand": "IV Stand"
+  "block.vitalis.stand": "IV Stand",
+
+  "message.vitalis.blood_bag_empty": "The blood bag is empty.",
+  "message.vitalis.blood_full": "Your blood level is already full.",
+  "message.vitalis.blood_restored": "%s ml blood restored.",
+  "item.vitalis.blood_bag.remaining": "Blood: %s / %s ml",
+
+  "item.vitalis.blood_bag": "Blood Bag",
+  "item.vitalis.blood_bag_empty": "Empty Blood Bag",
+
+  "item.vitalis.blood_bag_empty.tooltip": "Empty blood bag. Can be refilled at a blood transfusion station.",
+
+  "block.vitalis.old_computer": "Old Computer",
+
+  "screen.vitalis.turn_on": "Turn on",
+  "screen.vitalis.turn_off": "Turn off",
+
+  "screen.vitalis.computer": "Hospital Computer",
+  "screen.vitalis.use": "Use",
+  "block.vitalis.wet_floor": "Wet Floor Sign"
 }

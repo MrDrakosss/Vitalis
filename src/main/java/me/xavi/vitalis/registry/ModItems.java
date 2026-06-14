@@ -4,13 +4,16 @@ import me.xavi.vitalis.Vitalis;
 import me.xavi.vitalis.item.AdrenalineItem;
 import me.xavi.vitalis.item.EnergyDrinkItem;
 import me.xavi.vitalis.item.MedicalItem;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class ModItems {
+
+    public static List<Item> ITEMS = new ArrayList<>();
 
     public static final Item BANDAGE = register(
             "bandage",
@@ -147,8 +150,8 @@ public final class ModItems {
             )
     );
 
-    public static final Item ADRENALINE = register(
-            "adrenaline",
+    public static final Item ADRENALINE_INJECTION = register(
+            "adrenaline_injection",
             new AdrenalineItem(
                     new Item.Properties().stacksTo(8)
             )
@@ -182,36 +185,16 @@ public final class ModItems {
     }
 
     private static Item register(String name, Item item) {
-        return Registry.register(
+        Item i = Registry.register(
                 BuiltInRegistries.ITEM,
                 Vitalis.id(name),
                 item
         );
+        ITEMS.add(i);
+        return i;
     }
 
     public static void initialize() {
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> {
-            entries.accept(BANDAGE);
-            entries.accept(STERILE_BANDAGE);
-            entries.accept(PRESSURE_BANDAGE);
-            entries.accept(TOURNIQUET);
-            entries.accept(SPLINT);
-            entries.accept(CAST);
-            entries.accept(SURGICAL_KIT);
-            entries.accept(SCALPEL);
-            entries.accept(FORCEPS);
-            entries.accept(SUTURE_KIT);
-            entries.accept(PAINKILLER);
-            entries.accept(MORPHINE);
-            entries.accept(ANTIBIOTIC);
-            entries.accept(BLOOD_BAG);
-            entries.accept(IV_SET);
-            entries.accept(VITAL_SCANNER);
-            entries.accept(ENERGY_DRINK);
-            entries.accept(ADRENALINE);
-            entries.accept(DEFIBRILLATOR);
-            entries.accept(CPR_KIT);
-            entries.accept(OXYGEN_MASK);
-        });
+        Vitalis.LOGGER.info("Registering Vitalis items and blocks");
     }
 }

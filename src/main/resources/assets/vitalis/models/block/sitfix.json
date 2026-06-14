@@ -6,7 +6,7 @@
   ],
   "textures": {
     "0": "vitalis:block/hospital_sitfix",
-    "particle": "vitalis:block/hospital_sitfix"
+    "particle": "vitalis:block/break"
   },
   "elements": [
     {

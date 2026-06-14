@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "vitalis:block/medical_refrigerator"
+    },
+    "facing=east": {
+      "model": "vitalis:block/medical_refrigerator",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "vitalis:block/medical_refrigerator",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "vitalis:block/medical_refrigerator",
+      "y": 270
+    }
+  }
+}

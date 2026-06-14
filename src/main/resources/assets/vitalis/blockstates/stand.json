@@ -1,0 +1,53 @@
+{
+  "variants": {
+    "bags=0,facing=north,half=lower": { "model": "vitalis:block/stand_empty" },
+    "bags=0,facing=east,half=lower": { "model": "vitalis:block/stand_empty", "y": 90 },
+    "bags=0,facing=south,half=lower": { "model": "vitalis:block/stand_empty", "y": 180 },
+    "bags=0,facing=west,half=lower": { "model": "vitalis:block/stand_empty", "y": 270 },
+
+    "bags=1,facing=north,half=lower": { "model": "vitalis:block/stand_1" },
+    "bags=1,facing=east,half=lower": { "model": "vitalis:block/stand_1", "y": 90 },
+    "bags=1,facing=south,half=lower": { "model": "vitalis:block/stand_1", "y": 180 },
+    "bags=1,facing=west,half=lower": { "model": "vitalis:block/stand_1", "y": 270 },
+
+    "bags=2,facing=north,half=lower": { "model": "vitalis:block/stand_2" },
+    "bags=2,facing=east,half=lower": { "model": "vitalis:block/stand_2", "y": 90 },
+    "bags=2,facing=south,half=lower": { "model": "vitalis:block/stand_2", "y": 180 },
+    "bags=2,facing=west,half=lower": { "model": "vitalis:block/stand_2", "y": 270 },
+
+    "bags=3,facing=north,half=lower": { "model": "vitalis:block/stand_3" },
+    "bags=3,facing=east,half=lower": { "model": "vitalis:block/stand_3", "y": 90 },
+    "bags=3,facing=south,half=lower": { "model": "vitalis:block/stand_3", "y": 180 },
+    "bags=3,facing=west,half=lower": { "model": "vitalis:block/stand_3", "y": 270 },
+
+    "bags=4,facing=north,half=lower": { "model": "vitalis:block/stand_4" },
+    "bags=4,facing=east,half=lower": { "model": "vitalis:block/stand_4", "y": 90 },
+    "bags=4,facing=south,half=lower": { "model": "vitalis:block/stand_4", "y": 180 },
+    "bags=4,facing=west,half=lower": { "model": "vitalis:block/stand_4", "y": 270 },
+
+    "bags=0,facing=north,half=upper": { "model": "vitalis:block/empty" },
+    "bags=0,facing=east,half=upper": { "model": "vitalis:block/empty" },
+    "bags=0,facing=south,half=upper": { "model": "vitalis:block/empty" },
+    "bags=0,facing=west,half=upper": { "model": "vitalis:block/empty" },
+
+    "bags=1,facing=north,half=upper": { "model": "vitalis:block/empty" },
+    "bags=1,facing=east,half=upper": { "model": "vitalis:block/empty" },
+    "bags=1,facing=south,half=upper": { "model": "vitalis:block/empty" },
+    "bags=1,facing=west,half=upper": { "model": "vitalis:block/empty" },
+
+    "bags=2,facing=north,half=upper": { "model": "vitalis:block/empty" },
+    "bags=2,facing=east,half=upper": { "model": "vitalis:block/empty" },
+    "bags=2,facing=south,half=upper": { "model": "vitalis:block/empty" },
+    "bags=2,facing=west,half=upper": { "model": "vitalis:block/empty" },
+
+    "bags=3,facing=north,half=upper": { "model": "vitalis:block/empty" },
+    "bags=3,facing=east,half=upper": { "model": "vitalis:block/empty" },
+    "bags=3,facing=south,half=upper": { "model": "vitalis:block/empty" },
+    "bags=3,facing=west,half=upper": { "model": "vitalis:block/empty" },
+
+    "bags=4,facing=north,half=upper": { "model": "vitalis:block/empty" },
+    "bags=4,facing=east,half=upper": { "model": "vitalis:block/empty" },
+    "bags=4,facing=south,half=upper": { "model": "vitalis:block/empty" },
+    "bags=4,facing=west,half=upper": { "model": "vitalis:block/empty" }
+  }
+}

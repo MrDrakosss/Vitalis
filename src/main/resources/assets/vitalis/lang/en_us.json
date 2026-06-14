@@ -1,4 +1,6 @@
 {
+  "itemGroup.vitalis.main": "Vitalis",
+
   "block.vitalis.surgery_table": "Surgery Table",
   "item.vitalis.surgery_table": "Surgery Table",
 
@@ -146,5 +148,34 @@
   "screen.vitalis.revive_time": "Újraélesztési idő",
   "message.vitalis.player_revived": "A játékos újraélesztve.",
   "item.vitalis.defibrillator": "Defibrillátor",
-  "item.vitalis.defibrillator.tooltip": "Eszméletlen játékos újraélesztésére használható."
+  "item.vitalis.defibrillator.tooltip": "Eszméletlen játékos újraélesztésére használható.",
+
+  "item.vitalis.adrenaline_injection": "Adrenaline Injection",
+
+  "block.vitalis.medical_refrigerator": "Medical Refrigerator",
+  "block.vitalis.supply_cabinet": "Supply Cabinet",
+  "block.vitalis.equipment_cabinet": "Equipment Cabinet",
+
+  "container.vitalis.medical_refrigerator": "Medical Refrigerator",
+  "container.vitalis.supply_cabinet": "Supply Cabinet",
+  "container.vitalis.equipment_cabinet": "Equipment Cabinet",
+  "block.vitalis.large_medical_refrigerator": "Large Medical Refrigerator",
+  "block.vitalis.large_supply_cabinet": "Large Supply Cabinet",
+  "block.vitalis.large_equipment_cabinet": "Large Equipment Cabinet",
+
+  "block.vitalis.medical_refrigerator": "Medical Refrigerator",
+  "block.vitalis.supply_cabinet": "Supply Cabinet",
+  "block.vitalis.equipment_cabinet": "Equipment Cabinet",
+
+  "block.vitalis.large_medical_refrigerator": "Large Medical Refrigerator",
+  "block.vitalis.large_supply_cabinet": "Large Supply Cabinet",
+  "block.vitalis.large_equipment_cabinet": "Large Equipment Cabinet",
+
+  "container.vitalis.medical_refrigerator": "Medical Refrigerator",
+  "container.vitalis.supply_cabinet": "Supply Cabinet",
+  "container.vitalis.equipment_cabinet": "Equipment Cabinet",
+
+  "screen.vitalis.allowed_items": "Allowed items",
+
+  "block.vitalis.stand": "IV Stand"
 }

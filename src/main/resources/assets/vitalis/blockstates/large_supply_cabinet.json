@@ -1,0 +1,32 @@
+{
+  "variants": {
+    "facing=north,half=lower": {
+      "model": "vitalis:block/large_supply_cabinet"
+    },
+    "facing=east,half=lower": {
+      "model": "vitalis:block/large_supply_cabinet",
+      "y": 90
+    },
+    "facing=south,half=lower": {
+      "model": "vitalis:block/large_supply_cabinet",
+      "y": 180
+    },
+    "facing=west,half=lower": {
+      "model": "vitalis:block/large_supply_cabinet",
+      "y": 270
+    },
+
+    "facing=north,half=upper": {
+      "model": "vitalis:block/empty"
+    },
+    "facing=east,half=upper": {
+      "model": "vitalis:block/empty"
+    },
+    "facing=south,half=upper": {
+      "model": "vitalis:block/empty"
+    },
+    "facing=west,half=upper": {
+      "model": "vitalis:block/empty"
+    }
+  }
+}

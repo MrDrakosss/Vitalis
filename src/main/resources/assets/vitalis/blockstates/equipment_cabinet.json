@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "vitalis:block/equipment_cabinet"
+    },
+    "facing=east": {
+      "model": "vitalis:block/equipment_cabinet",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "vitalis:block/equipment_cabinet",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "vitalis:block/equipment_cabinet",
+      "y": 270
+    }
+  }
+}

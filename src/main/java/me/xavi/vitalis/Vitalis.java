@@ -39,7 +39,9 @@ public class Vitalis implements ModInitializer {
         ModBlockEntities.initialize();
         ModNetwork.initialize();
         ModItems.initialize();
+        ModItemGroups.initialize();
         ModParticles.initialize();
+        ModMenuTypes.register();
 
         SurgeryData.ensureRegistered();
 

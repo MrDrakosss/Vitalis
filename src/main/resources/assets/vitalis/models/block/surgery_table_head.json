@@ -4,7 +4,7 @@
 	"texture_size": [128, 128],
 	"textures": {
 		"0": "vitalis:block/surgery_table",
-		"particle": "block/bedrock"
+		"particle": "vitalis:block/break"
 	},
 	"elements": [
 		{

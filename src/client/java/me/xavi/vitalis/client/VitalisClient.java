@@ -6,20 +6,25 @@ import me.xavi.vitalis.client.particle.BloodParticle;
 import me.xavi.vitalis.client.renderer.MedicalEffectsOverlay;
 import me.xavi.vitalis.client.renderer.MedicalStatusHud;
 import me.xavi.vitalis.client.screen.DownedScreen;
+import me.xavi.vitalis.client.screen.MedicalCabinetScreen;
 import me.xavi.vitalis.client.screen.SurgeryScreen;
 import me.xavi.vitalis.client.state.ClientDownedState;
 import me.xavi.vitalis.client.state.ClientMedicalState;
 import me.xavi.vitalis.client.state.ClientSurgeryState;
 import me.xavi.vitalis.client.state.ClientSurgeryTreatmentState;
 import me.xavi.vitalis.registry.ModBlocks;
+import me.xavi.vitalis.registry.ModMenuTypes;
 import me.xavi.vitalis.registry.ModNetwork;
 import me.xavi.vitalis.registry.ModParticles;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -131,5 +136,15 @@ public class VitalisClient implements ClientModInitializer {
 
         MedicalEffectsOverlay.register();
         MedicalStatusHud.register();
+
+        MenuScreens.register(ModMenuTypes.MEDICAL_REFRIGERATOR, MedicalCabinetScreen::new);
+        MenuScreens.register(ModMenuTypes.SUPPLY_CABINET, MedicalCabinetScreen::new);
+        MenuScreens.register(ModMenuTypes.EQUIPMENT_CABINET, MedicalCabinetScreen::new);
+
+        MenuScreens.register(ModMenuTypes.LARGE_MEDICAL_REFRIGERATOR, MedicalCabinetScreen::new);
+        MenuScreens.register(ModMenuTypes.LARGE_SUPPLY_CABINET, MedicalCabinetScreen::new);
+        MenuScreens.register(ModMenuTypes.LARGE_EQUIPMENT_CABINET, MedicalCabinetScreen::new);
+
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.STAND, RenderType.cutout());
     }
 }

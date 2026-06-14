@@ -1,7 +1,6 @@
 package me.xavi.vitalis.block;
 
-import me.xavi.vitalis.medical.BodyPart;
-import me.xavi.vitalis.medical.InjuryStatus;
+import me.xavi.vitalis.block.entity.SurgeryTableBlockEntity;
 import me.xavi.vitalis.network.SurgeryStatePayload;
 import me.xavi.vitalis.util.SurgeryData;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;

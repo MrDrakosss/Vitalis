@@ -1,4 +1,4 @@
-package me.xavi.vitalis.block;
+package me.xavi.vitalis.block.entity;
 
 import me.xavi.vitalis.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;

@@ -6,7 +6,7 @@
   ],
   "textures": {
     "0": "vitalis:block/hospital_sofa_third_white",
-    "particle": "vitalis:block/hospital_sofa_third_white"
+    "particle": "vitalis:block/break"
   },
   "elements": [
     {

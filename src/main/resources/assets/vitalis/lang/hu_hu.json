@@ -1,4 +1,6 @@
 {
+  "itemGroup.vitalis.main": "Vitalis",
+
   "block.vitalis.surgery_table": "Műtőasztal",
   "item.vitalis.surgery_table": "Műtőasztal",
 
@@ -147,5 +149,34 @@
   "screen.vitalis.revive_time": "Újraélesztési idő",
   "message.vitalis.player_revived": "A játékos újraélesztve.",
   "item.vitalis.defibrillator": "Defibrillátor",
-  "item.vitalis.defibrillator.tooltip": "Eszméletlen játékos újraélesztésére használható."
+  "item.vitalis.defibrillator.tooltip": "Eszméletlen játékos újraélesztésére használható.",
+
+  "item.vitalis.adrenaline_injection": "Adrenalin injekció",
+
+  "block.vitalis.medical_refrigerator": "Orvosi hűtőszekrény",
+  "block.vitalis.supply_cabinet": "Ellátmány szekrény",
+  "block.vitalis.equipment_cabinet": "Eszközszekrény",
+
+  "container.vitalis.medical_refrigerator": "Orvosi hűtőszekrény",
+  "container.vitalis.supply_cabinet": "Ellátmány szekrény",
+  "container.vitalis.equipment_cabinet": "Eszközszekrény",
+  "block.vitalis.large_medical_refrigerator": "Nagy orvosi hűtőszekrény",
+  "block.vitalis.large_supply_cabinet": "Nagy ellátmány szekrény",
+  "block.vitalis.large_equipment_cabinet": "Nagy eszközszekrény",
+
+  "block.vitalis.medical_refrigerator": "Orvosi hűtőszekrény",
+  "block.vitalis.supply_cabinet": "Ellátmány szekrény",
+  "block.vitalis.equipment_cabinet": "Eszközszekrény",
+
+  "block.vitalis.large_medical_refrigerator": "Nagy orvosi hűtőszekrény",
+  "block.vitalis.large_supply_cabinet": "Nagy ellátmány szekrény",
+  "block.vitalis.large_equipment_cabinet": "Nagy eszközszekrény",
+
+  "container.vitalis.medical_refrigerator": "Orvosi hűtőszekrény",
+  "container.vitalis.supply_cabinet": "Ellátmány szekrény",
+  "container.vitalis.equipment_cabinet": "Eszközszekrény",
+
+  "screen.vitalis.allowed_items": "Engedélyezett tárgyak",
+
+  "block.vitalis.stand": "Infúziós állvány"
 }

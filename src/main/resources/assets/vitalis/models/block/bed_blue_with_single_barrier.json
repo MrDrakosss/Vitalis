@@ -6,7 +6,7 @@
   ],
   "textures": {
     "0": "vitalis:block/hospital_bed_blue_with_single_barrier",
-    "particle": "vitalis:block/hospital_bed_blue_with_single_barrier"
+    "particle": "vitalis:block/break"
   },
   "elements": [
     {

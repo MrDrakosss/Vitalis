@@ -6,7 +6,7 @@
   ],
   "textures": {
     "0": "vitalis:block/hospital_shelf_with_handle",
-    "particle": "vitalis:block/hospital_shelf_with_handle"
+    "particle": "vitalis:block/break"
   },
   "elements": [
     {

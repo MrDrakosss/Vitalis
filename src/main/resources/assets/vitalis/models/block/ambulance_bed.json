@@ -6,7 +6,7 @@
   ],
   "textures": {
     "0": "vitalis:block/hospital_ambulance_bed",
-    "particle": "vitalis:block/hospital_ambulance_bed"
+    "particle": "vitalis:block/break"
   },
   "elements": [
     {

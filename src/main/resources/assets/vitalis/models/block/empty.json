@@ -1,6 +1,6 @@
 {
   "textures": {
-    "particle": "minecraft:block/bedrock"
+    "particle": "vitalis:block/break"
   },
   "elements": []
 }
